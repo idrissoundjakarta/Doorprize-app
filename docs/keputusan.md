@@ -162,3 +162,9 @@ Sebelum brainstorming, sempat dibuat prototipe satu file HTML. Kalau saya upload
 - Confetti dan suara yang dibuat lewat kode (WebAudio)
 
 **Jangan dibawa:** kredit dan font Soundjakarta, flow tanpa sesi, dan 5 gaya undian sekaligus.
+
+## 8. Keputusan lanjutan (18 Nov 2026)
+
+- **Teknologi:** aplikasi web (PWA, bisa di-install dan jalan offline) di Chrome/Edge. Bagian penyimpanan file dibuat sebagai lapisan terpisah, supaya kalau nanti perlu dibungkus jadi aplikasi desktop, engine tidak perlu dibongkar. Font disertakan di dalam aplikasi, tidak dimuat dari internet.
+- **Tidak pakai wheel/roda** sebagai gaya undian, termasuk di daftar gaya tambahan nanti. Gaya undian harus terasa eksklusif dan mahal, layak sebagai aplikasi berbayar.
+- **Permintaan baru: opsi "pilih sebagai pemenang"** (pemenang ditentukan manual). Masih dibahas, lihat catatan di percakapan. Engine disiapkan agar tiap hasil undian punya catatan sumber: `acak` atau `manual`.
