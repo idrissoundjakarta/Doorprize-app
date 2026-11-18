@@ -174,10 +174,15 @@ Sebelum brainstorming, sempat dibuat prototipe satu file HTML. Kalau saya upload
 - **Upload KV untuk ambil palet warna** masuk MVP sebagai **opsi sampingan di setup**. KV hanya dipakai untuk menyarankan palet, tidak ditampilkan di layar show. Pengguna tetap bisa mengubah warna manual.
 - **Mode dua layar masuk MVP sebagai mode utama:** jendela operator di laptop, jendela show fullscreen di LED/proyektor. **Mode satu layar jadi cadangan** (panel operator kecil di atas layar show, tombol M).
 
+- **Tampilan UI operator & setup: terang, warna gading** (bukan putih polos). Mode gelap untuk UI menyusul di update berikutnya. Tampilan **layar LED tidak ikut tema UI**: warnanya mengikuti KV/brand klien.
+- **Gerak di semua adegan:** selain animasi masuk/keluar, adegan *hold* tetap punya gerak halus (foto hadiah melayang, cahaya mengalir, kilau sesekali) supaya tidak garing saat MC bicara. Saat nomor/nama pemenang tampil, gerak dibuat lebih kalem supaya tetap terbaca.
+- **Confetti + suara di Reveal** (lebih heboh untuk Grand Prize).
+- **Gaya undian jadi 5** (tetap tanpa wheel): Buka digit (bawaan), Slot reel, + 3 gaya baru yang dipilih setelah usulan dikonfirmasi (lihat percakapan 18 Nov 2026).
+
 ### Rencana MVP (ringkas)
 
 1. Setup: sesi & hadiah (nama, jumlah, foto, urutan), peserta (generate rentang / paste / upload xlsx-csv, pilih kolom, bersihkan data), brand (logo, judul acara), tampilan (template generatif, warna, font, opsi ambil palet dari KV), gaya & tempo undian.
 2. Engine cue list: Looping → Opener → Showcase → Ready → Undi → Reveal, hangus/undi ulang, simpan otomatis.
-3. Show: 3 layer (background WebGL, konten HTML, brand), 3 template generatif, 2 gaya undian (Buka digit, Slot reel).
+3. Show: 3 layer (background WebGL, konten HTML, brand), 3 template generatif, 5 gaya undian, gerak di semua adegan, confetti + suara.
 4. Operator: mode dua layar (utama) dan satu layar (cadangan), keyboard & clicker, export pemenang CSV/Excel.
 5. Offline (PWA).
