@@ -119,7 +119,7 @@
 - **Claim + timer:** "Silakan maju ke panggung" dengan hitung mundur sebelum hangus.
 - Hitung mundur 3-2-1 di adegan Ready
 - Recap pemenang di akhir sesi
-- Layar operator terpisah dari layar output (dua layar)
+- ~~Layar operator terpisah dari layar output (dua layar)~~ → dipindah ke MVP (lihat bagian 8)
 - Aturan kelayakan per hadiah (misalnya grand prize hanya untuk karyawan tetap) dan penguncian data untuk audit
 - Gaya undian tambahan (roda, sorot grid, bola 3D, kocokan arisan, kapsul gacha, dll.)
 - Mystery prize (pemenang diundi dulu, lalu memilih kotak hadiah)
@@ -170,4 +170,14 @@ Sebelum brainstorming, sempat dibuat prototipe satu file HTML. Kalau saya upload
 - **Yang bisa dikustom di MVP:** daftar peserta, logo klien, foto hadiah, serta **warna dan font** yang dipilih saat setup supaya mendekati KV klien. Font dipilih dari koleksi bawaan (offline). Upload font sendiri ditunda.
 - Karena tidak ada upload background, "warna tema otomatis dari background" (3.7) diganti dengan pemilihan warna manual. Opsi tambahan yang diusulkan: upload KV hanya untuk mengambil palet warna (gambarnya tidak ditampilkan).
 - **Tidak pakai wheel/roda** sebagai gaya undian, termasuk di daftar gaya tambahan nanti. Gaya undian harus terasa eksklusif dan mahal, layak sebagai aplikasi berbayar.
-- **Permintaan baru: opsi "pilih sebagai pemenang"** (pemenang ditentukan manual). Masih dibahas, lihat catatan di percakapan. Engine disiapkan agar tiap hasil undian punya catatan sumber: `acak` atau `manual`.
+- **Opsi "pilih sebagai pemenang"** (pemenang ditentukan manual): **ditunda, tidak dikerjakan di MVP.** Engine tetap menyimpan catatan sumber tiap hasil (`acak`/`manual`) supaya bisa ditambahkan nanti.
+- **Upload KV untuk ambil palet warna** masuk MVP sebagai **opsi sampingan di setup**. KV hanya dipakai untuk menyarankan palet, tidak ditampilkan di layar show. Pengguna tetap bisa mengubah warna manual.
+- **Mode dua layar masuk MVP sebagai mode utama:** jendela operator di laptop, jendela show fullscreen di LED/proyektor. **Mode satu layar jadi cadangan** (panel operator kecil di atas layar show, tombol M).
+
+### Rencana MVP (ringkas)
+
+1. Setup: sesi & hadiah (nama, jumlah, foto, urutan), peserta (generate rentang / paste / upload xlsx-csv, pilih kolom, bersihkan data), brand (logo, judul acara), tampilan (template generatif, warna, font, opsi ambil palet dari KV), gaya & tempo undian.
+2. Engine cue list: Looping → Opener → Showcase → Ready → Undi → Reveal, hangus/undi ulang, simpan otomatis.
+3. Show: 3 layer (background WebGL, konten HTML, brand), 3 template generatif, 2 gaya undian (Buka digit, Slot reel).
+4. Operator: mode dua layar (utama) dan satu layar (cadangan), keyboard & clicker, export pemenang CSV/Excel.
+5. Offline (PWA).

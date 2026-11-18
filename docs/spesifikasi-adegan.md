@@ -1,6 +1,6 @@
 # Spesifikasi adegan MVP
 
-> Status: **draf, menunggu persetujuan** (tahap 3 ✋). Dasar: `docs/keputusan.md` bagian 3 dan 8.
+> Status: **disetujui** 18 Nov 2026 (tahap 3 ✋), ditambah mode dua layar. Dasar: `docs/keputusan.md` bagian 3 dan 8.
 > Angka durasi adalah titik awal. Nanti disetel ulang setelah dicoba.
 
 ## A. Aturan umum
@@ -26,7 +26,7 @@
 | **B** atau **.** (tombol "layar hitam" di clicker) | Sembunyikan konten. Hanya background + brand yang tampil. Tekan lagi untuk kembali. |
 | **H** | Hangus, hanya di Reveal. Harus ditekan **2× dalam 3 detik**. |
 | **F** | Fullscreen |
-| **M** | Buka/tutup panel operator |
+| **M** | Buka/tutup panel operator (mode satu layar) |
 
 - **Anti dobel-tekan:** NEXT diabaikan selama 0,8 dtk setelah pindah adegan. Clicker sering terpencet dua kali.
 - Adegan **auto** tidak bisa di-NEXT, supaya ketegangan undian tidak terlewat tanpa sengaja.
@@ -77,14 +77,21 @@
   - Sesi selesai → **Looping** (teaser sesi berikutnya).
 - **H ×2 (Hangus):** pemenang dicatat "hangus", dikeluarkan dari undian, lalu kembali ke **Ready**. Jumlah peserta di Ready ikut berkurang.
 
-## C. Panel operator (tombol M)
+## C. Jendela operator dan mode layar
 
-- Isinya: adegan sekarang dan berikutnya, daftar pemenang dan hangus, lompat ke sesi/hadiah tertentu, export CSV/Excel.
-- ⚠️ **Risiko:** MVP hanya satu layar, jadi panel ini **ikut tampil di LED**. Karena itu panel dibuat kecil dan ringkas, dan sebaiknya dibuka hanya saat layar di-*blank* (B). Solusi penuhnya adalah dua layar (sudah masuk daftar ditunda).
+**Mode dua layar (utama).** Laptop disambung ke LED/proyektor dalam mode *extend*.
+- **Jendela operator** di layar laptop. Isinya: pratinjau kecil layar show, adegan sekarang dan berikutnya, tombol NEXT / BACK / Hangus / Layar hitam, daftar pemenang dan hangus, lompat ke sesi/hadiah, export CSV/Excel, serta status "Layar show terhubung".
+- **Jendela show** dibuka dari jendela operator, lalu fullscreen di LED. Isinya hanya show, tanpa elemen operator.
+- Engine dan data ada di jendela operator. Jendela show hanya menampilkan. Kalau jendela show tertutup atau ter-refresh, dia tersambung ulang dan langsung menampilkan adegan yang sedang berjalan.
+- Tombol keyboard/clicker berfungsi di **kedua jendela**, mana pun yang sedang aktif. Clicker mengirim tombol ke jendela yang terakhir diklik, jadi keduanya harus siap menerima.
+- Hangus di jendela operator memakai tombol + konfirmasi. H ×2 tetap berlaku.
+- **Fakta:** Chrome/Edge bisa langsung menaruh jendela show fullscreen di layar kedua, tapi perlu izin sekali ("kelola jendela"). Kalau izin ditolak, operator menyeret jendela show ke LED lalu menekan F.
+
+**Mode satu layar (cadangan).** Untuk laptop yang mirror ke LED atau kalau dua layar bermasalah. Panel operator kecil dibuka dengan tombol M, dan ikut tampil di LED. Sebaiknya dibuka saat layar di-blank (B).
 
 ## D. Disiapkan di engine, belum tampil di MVP
 
-- Tiap hasil undian menyimpan catatan **sumber** (`acak` / `manual`) dan **status** (`sah` / `hangus`). Ini untuk fitur "pilih sebagai pemenang" yang masih dibahas.
+- Tiap hasil undian menyimpan catatan **sumber** (`acak` / `manual`) dan **status** (`sah` / `hangus`). "Pilih sebagai pemenang" ditunda.
 - Adegan disusun sebagai daftar langkah (cue list), sehingga Batch, Eliminasi, Claim timer, Hitung mundur, dan Recap bisa ditambahkan sebagai jenis adegan baru tanpa mengubah adegan yang sudah ada.
 
 ## E. Asumsi yang perlu divalidasi
