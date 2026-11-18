@@ -165,6 +165,9 @@ Sebelum brainstorming, sempat dibuat prototipe satu file HTML. Kalau saya upload
 
 ## 8. Keputusan lanjutan (18 Nov 2026)
 
-- **Teknologi:** aplikasi web (PWA, bisa di-install dan jalan offline) di Chrome/Edge. Bagian penyimpanan file dibuat sebagai lapisan terpisah, supaya kalau nanti perlu dibungkus jadi aplikasi desktop, engine tidak perlu dibongkar. Font disertakan di dalam aplikasi, tidak dimuat dari internet.
+- **Teknologi:** aplikasi web (PWA, bisa di-install dan jalan offline) di Chrome/Edge, dibangun dengan **Next.js** (mode static export). Background dan efek digambar live dengan **WebGL**. Nomor/nama tetap berupa teks HTML yang dianimasikan di atasnya supaya tajam. Bagian penyimpanan dibuat sebagai lapisan terpisah. Font disertakan di dalam aplikasi, tidak dimuat dari internet.
+- **MVP tanpa upload background (video maupun gambar).** Tampilan memakai 3 template generatif WebGL. Upload video background menjadi fitur update berikutnya. Alasannya: aplikasi perlu cepat jadi.
+- **Yang bisa dikustom di MVP:** daftar peserta, logo klien, foto hadiah, serta **warna dan font** yang dipilih saat setup supaya mendekati KV klien. Font dipilih dari koleksi bawaan (offline). Upload font sendiri ditunda.
+- Karena tidak ada upload background, "warna tema otomatis dari background" (3.7) diganti dengan pemilihan warna manual. Opsi tambahan yang diusulkan: upload KV hanya untuk mengambil palet warna (gambarnya tidak ditampilkan).
 - **Tidak pakai wheel/roda** sebagai gaya undian, termasuk di daftar gaya tambahan nanti. Gaya undian harus terasa eksklusif dan mahal, layak sebagai aplikasi berbayar.
 - **Permintaan baru: opsi "pilih sebagai pemenang"** (pemenang ditentukan manual). Masih dibahas, lihat catatan di percakapan. Engine disiapkan agar tiap hasil undian punya catatan sumber: `acak` atau `manual`.

@@ -18,6 +18,8 @@ Aplikasi undian doorprize untuk event corporate (gathering, gala dinner, family 
 
 ## Prinsip teknis yang sudah disepakati
 
+- Stack: Next.js (static export, PWA offline) + WebGL untuk background/efek. Teks nomor/nama tetap HTML. Lihat `docs/keputusan.md` bagian 8.
+- MVP tanpa upload background. Kustomisasi: peserta, logo, foto hadiah, warna, font.
 - Pemenang dipilih dengan pengacakan kriptografis (`crypto.getRandomValues`). Animasi hanya menampilkan hasil yang sudah dipilih.
 - Satu peserta hanya bisa menang sekali (default). Pemenang hangus tetap tercatat dan keluar dari undian.
 - Harus jalan **offline** saat undian, dan state show tersimpan otomatis (aman dari refresh/tertutup).
