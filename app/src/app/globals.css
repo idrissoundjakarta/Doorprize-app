@@ -1,0 +1,101 @@
+/* Prototipe: tampilan netral seadanya. Visual final dikerjakan di tahap 5. */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: #111; color: #eee; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { background: #2a2a2a; border: 1px solid #444; border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+button:hover:not(:disabled) { background: #363636; }
+button:disabled { opacity: .35; cursor: default; }
+button.primary { background: #2f6fed; border-color: #2f6fed; }
+button.danger { border-color: #8a3030; color: #ffb3b3; }
+button.danger.armed { background: #b32525; color: #fff; }
+button.active { background: #ddd; color: #111; }
+input, select, textarea { background: #1b1b1b; border: 1px solid #444; border-radius: 6px; padding: 6px 8px; }
+.waiting { display: grid; place-items: center; height: 100vh; color: #888; }
+.hint { color: #888; font-size: 13px; }
+.muted { color: #888; }
+.warn { color: #ffcf66; font-weight: 600; }
+.count { background: #333; border-radius: 10px; padding: 0 8px; font-size: 13px; margin-left: 6px; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.grow { flex: 1; min-width: 120px; }
+
+/* ---------- Operator ---------- */
+.operator { min-height: 100vh; display: flex; flex-direction: column; }
+.topbar { display: flex; gap: 12px; align-items: center; padding: 10px 16px; border-bottom: 1px solid #333; flex-wrap: wrap; }
+.topbar nav { display: flex; gap: 4px; margin-right: auto; }
+.conn { font-size: 13px; color: #888; }
+.conn.ok { color: #6bd68b; }
+.show-tab { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr); gap: 20px; padding: 16px; }
+.left { display: flex; flex-direction: column; gap: 12px; }
+.preview { aspect-ratio: 16 / 9; border: 1px solid #333; border-radius: 6px; overflow: hidden; }
+.status { display: flex; flex-direction: column; gap: 4px; }
+.status .mode { font-size: 12px; text-transform: uppercase; background: #333; border-radius: 4px; padding: 1px 6px; margin-left: 6px; }
+.next-hint { color: #aaa; }
+.controls { display: flex; gap: 8px; flex-wrap: wrap; }
+.controls button { padding: 12px 18px; }
+.controls .next { padding: 12px 40px; font-weight: 700; }
+.right h3 { margin: 4px 0 8px; font-size: 15px; }
+.sessions { list-style: none; display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; }
+.sessions li { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; padding: 4px 8px; border-radius: 6px; }
+.sessions li.current { background: #1f2c45; }
+.winners { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 12px; }
+.winners td { padding: 4px 6px; border-bottom: 1px solid #262626; }
+.winners tr.hangus td { color: #ff8a8a; text-decoration: line-through; }
+.winners tr.pending td { color: #ffcf66; }
+
+/* ---------- Setup ---------- */
+.setup { padding: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; align-items: start; }
+.setup section { display: flex; flex-direction: column; gap: 10px; background: #181818; border: 1px solid #2a2a2a; border-radius: 8px; padding: 14px; }
+.setup h2 { font-size: 16px; }
+.setup label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #bbb; }
+.setup .row label { flex-direction: row; align-items: center; }
+.setup input[type="number"] { width: 90px; }
+.setup .qty { width: 64px !important; }
+.session-card { border: 1px solid #333; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+.prize-row { padding-left: 16px; }
+.setup-actions { grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+/* ---------- Jendela show ---------- */
+.show-window { position: fixed; inset: 0; background: #000; cursor: none; }
+.fs-hint { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); font-size: 13px; color: #fff8; background: #0008; padding: 4px 10px; border-radius: 6px; }
+.solo-panel { position: absolute; right: 12px; bottom: 12px; width: min(420px, 40vw); background: #111e; border: 1px solid #444; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px; cursor: default; font-size: 14px; }
+
+/* ---------- Panggung (3 layer) ---------- */
+/* container-type: ukuran teks mengikuti ukuran panggung (cqw/cqh/cqmin), jadi sama di LED, pratinjau, dan rasio apa pun. */
+.stage { position: relative; width: 100%; height: 100%; overflow: hidden; container-type: size; color: #fff; }
+.bg { position: absolute; inset: 0; transition: opacity 1.5s ease; }
+.bg-tenang { background: radial-gradient(ellipse at 50% 40%, #2b3550 0%, #10131c 70%); }
+.bg-intens { background: radial-gradient(ellipse at 50% 50%, #5a2a4a 0%, #1a0d18 70%); opacity: 0; }
+.bg-intens.on { opacity: 1; }
+.brand { position: absolute; top: 5cqh; left: 4cqw; display: flex; align-items: center; gap: 1.5cqmin; transition: transform .6s ease, opacity .6s ease; transform-origin: top left; z-index: 3; }
+.brand.compact { transform: scale(.7); opacity: .8; }
+.logo { border: .3cqmin dashed #fff8; padding: 1cqmin 2cqmin; font-size: 2.4cqmin; letter-spacing: .2em; color: #fffa; }
+.event-title { font-size: 2.6cqmin; font-weight: 600; color: #fffc; }
+.content { position: absolute; inset: 0; display: grid; place-items: center; z-index: 2; transition: opacity .5s ease; }
+.content.hidden { opacity: 0; }
+/* Area aman tengah ±60% × 50%, tapi boleh melebar sampai 80% untuk teks besar */
+.scene { width: 80cqw; max-height: 80cqh; display: grid; place-items: center; text-align: center; animation: sceneIn .7s ease both; }
+@keyframes sceneIn { from { opacity: 0; transform: translateY(2cqh) scale(.98); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+.stack { display: flex; flex-direction: column; align-items: center; gap: 2cqmin; max-width: 100%; }
+.kicker { font-size: 3cqmin; letter-spacing: .3em; text-transform: uppercase; color: #fffb; }
+.title { font-weight: 800; line-height: 1.05; white-space: nowrap; }
+.sub { font-size: 3cqmin; color: #fffc; }
+.sub.small { font-size: 2.4cqmin; color: #fff9; }
+.photo { width: 34cqmin; aspect-ratio: 4 / 3; border: .3cqmin dashed #fff6; border-radius: 1.5cqmin; display: grid; place-items: center; font-size: 2.2cqmin; color: #fff8; padding: 2cqmin; }
+.photo.blur { filter: blur(3px); }
+.big-number { font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.name { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80cqw; }
+.prize-tag { font-size: 2.6cqmin; border: .2cqmin solid #fff6; border-radius: 99px; padding: .8cqmin 3cqmin; color: #fffc; }
+.opener .title { letter-spacing: .05em; }
+.reveal .big-number { animation: hit .5s cubic-bezier(.2,.9,.1,1.2) both; }
+@keyframes hit { from { transform: scale(1.4); opacity: 0; } to { transform: none; opacity: 1; } }
+.scene-tag { position: absolute; right: 2cqw; bottom: 2cqh; font-size: 1.6cqmin; color: #fff4; font-family: monospace; z-index: 3; }
+
+/* Gaya undian */
+.digits { display: flex; gap: .05em; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
+.digit { display: inline-block; min-width: .62em; color: #fff7; }
+.digit.locked { color: #fff; animation: lock .35s ease both; }
+@keyframes lock { from { transform: scale(1.25); } to { transform: none; } }
+.reel { height: 3.6em; overflow: hidden; font-weight: 900; line-height: 1.2em; -webkit-mask-image: linear-gradient(transparent, #0008 30%, #000 40%, #000 60%, #0008 70%, transparent); mask-image: linear-gradient(transparent, #0008 30%, #000 40%, #000 60%, #0008 70%, transparent); }
+.reel-strip { will-change: transform; padding-top: 1.2em; }
+.reel-item { height: 1.2em; white-space: nowrap; font-variant-numeric: tabular-nums; }
