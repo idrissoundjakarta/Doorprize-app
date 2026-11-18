@@ -15,4 +15,4 @@ Perintah (dari folder `app/`):
 - `npx vitest run`: uji engine
 - `npm run build`: hasil statis di `out/`
 
-Untuk dicoba lewat link: build statis bisa diterbitkan ke GitHub Pages (`NEXT_BASE_PATH=/<nama-repo>`), menunggu persetujuan.
+Setiap push ke branch kerja otomatis terbit ke GitHub Pages (`.github/workflows/pages.yml`): https://idrissoundjakarta.github.io/Doorprize-app/
