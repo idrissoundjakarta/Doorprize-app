@@ -5,7 +5,7 @@ Tempat prototipe lama (`prototype-v0.html`) kalau di-upload. Hanya referensi tek
 ## Catatan teknik dari prototype-v0.html
 
 Yang dipakai ulang (tekniknya, bukan kodenya mentah-mentah):
-- Wheel berhenti tepat di pemenang yang sudah dipilih lebih dulu (`spinWheel`): sudut akhir dihitung dari posisi pemenang plus sedikit jitter.
+- Prinsip "animasi berhenti tepat di pemenang yang sudah dipilih lebih dulu" (`spinWheel`, `spinSlot`). Bentuk wheel-nya sendiri tidak dipakai.
 - Ambil palet dari gambar (`extractPalette`): gambar dikecilkan ke kanvas ~80px, lalu warna dikelompokkan.
 - Confetti dan suara dibuat lewat kode (WebAudio).
 
