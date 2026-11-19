@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Usulan palet identitas UI</title>
+<!-- Usulan warna identitas untuk UI setup & operator (bukan layar LED). Warna utama & dasar = referensi
+     (#282828, #FFFFFF, #F7F7F7); yang diusulkan hanya dua aksen pastel. Font UI: Sora. -->
+<style>
+@font-face { font-family: Sora; src: url(fonts/Sora.woff2) format("woff2"); font-weight: 300 700; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Sora, sans-serif; background: #fff; color: #282828; width: 1920px; }
+.opt { padding: 70px 90px 80px; display: grid; grid-template-columns: 1fr 640px; gap: 70px; align-items: start; }
+.opt + .opt { border-top: 1px solid #eee; }
+.head { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 20px; }
+.head h2 { font-size: 40px; font-weight: 600; letter-spacing: -.01em; }
+.head .rec { font-size: 14px; font-weight: 600; padding: 8px 16px; border-radius: 99px; background: var(--a1); }
+.head p { margin-left: auto; max-width: 620px; font-size: 16px; line-height: 1.6; color: #8A8A8A; font-weight: 400; }
+.sw { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+.sw div { height: 300px; border-radius: 30px; padding: 26px; display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,.06); }
+.sw b { font-size: 21px; font-weight: 600; }
+.sw small { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; margin-top: 6px; opacity: .75; }
+.sw span { margin-top: auto; font-size: 13px; letter-spacing: .06em; opacity: .8; }
+.why { margin-top: 30px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; font-size: 15px; line-height: 1.6; color: #5E5E5E; }
+.why div { background: #F7F7F7; border-radius: 22px; padding: 20px 22px; }
+.why b { display: block; color: #282828; font-weight: 600; margin-bottom: 4px; }
+
+/* contoh UI */
+.ui { background: var(--bg2); border-radius: 36px; padding: 28px; display: flex; flex-direction: column; gap: 16px; }
+.card { background: var(--bg1); border-radius: 26px; padding: 22px 24px; }
+.row { display: flex; align-items: center; gap: 12px; }
+.lbl { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: #8A8A8A; font-weight: 600; }
+.chip { font-size: 12px; font-weight: 600; padding: 7px 14px; border-radius: 99px; }
+.btn { border-radius: 99px; padding: 18px 26px; font-weight: 600; font-size: 17px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.ico { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-size: 18px; font-weight: 700; }
+.bar { height: 10px; border-radius: 9px; background: #ECECEC; overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: 9px; }
+.big { font-size: 64px; font-weight: 600; letter-spacing: -.03em; line-height: 1; }
+</style>
+</head>
+<body>
+
+<!-- ===== Opsi A ===== -->
+<section class="opt" style="--ink:#282828;--bg1:#FFFFFF;--bg2:#F7F7F7;--a1:#E8CB7D;--a2:#EBC2B5">
+  <div class="head"><h2>Opsi A · Champagne</h2><span class="rec">Rekomendasi</span>
+    <p>Hitam, putih & abu dari referensi. Aksennya diganti emas champagne (hadiah & perayaan) dan rose (meriah, hangat).</p></div>
+  <div>
+    <div class="sw">
+      <div style="background:#282828;color:#FFFFFF"><b>Lunar Shadow</b><small>Warna utama</small><span>HEX #282828</span></div>
+      <div style="background:#FFFFFF"><b>Clean White</b><small>Dasar 1</small><span>HEX #FFFFFF</span></div>
+      <div style="background:#F7F7F7"><b>Gray Whisper</b><small>Dasar 2</small><span>HEX #F7F7F7</span></div>
+      <div style="background:#E8CB7D"><b>Champagne</b><small>Aksen 1</small><span>HEX #E8CB7D</span></div>
+      <div style="background:#EBC2B5"><b>Rose Quartz</b><small>Aksen 2</small><span>HEX #EBC2B5</span></div>
+    </div>
+    <div class="why">
+      <div><b>Makna</b>Emas = hadiah, kemenangan, kemewahan. Rose = hangat & meriah, seperti suasana pesta.</div>
+      <div><b>Aman dengan KV klien</b>Netral & hangat, tidak "bertabrakan" saat jendela operator & layar LED terlihat bersamaan.</div>
+      <div><b>Catatan</b>Aksen pastel hanya untuk latar chip, highlight, progres. Teks di atasnya tetap hitam supaya terbaca.</div>
+    </div>
+  </div>
+  <div class="ui">
+    <div class="row"><div style="font-size:22px;font-weight:600">Doorprize</div><span class="chip" style="background:#282828;color:#FFFFFF;margin-left:auto">Show</span><span class="chip" style="background:#FFFFFF">Setup</span></div>
+    <div class="card"><div class="row"><span class="lbl">Sedang tampil</span><span class="chip" style="background:#E8CB7D;margin-left:auto">● Reveal</span></div>
+      <div class="row" style="margin-top:16px"><div class="ico" style="background:#E8CB7D">★</div><div><div class="big">247</div></div><div style="margin-left:12px"><div style="font-weight:600;font-size:18px">Rizky Pratama</div><div style="font-size:14px;color:#8A8A8A">Motor Matic</div></div></div></div>
+    <div class="btn" style="background:#282828;color:#FFFFFF">Sah · Lanjut <span style="background:#E8CB7D;color:#282828;border-radius:50%;width:30px;height:30px;display:grid;place-items:center">→</span></div>
+    <div class="row" style="gap:12px"><div class="btn" style="flex:1;background:#FFFFFF">Kembali</div><div class="btn" style="flex:1;background:#EBC2B5">Hangus</div></div>
+    <div class="card"><div class="row"><span class="lbl">Grand Prize</span><span style="margin-left:auto;font-weight:600">2/3</span></div><div class="bar" style="margin-top:12px"><i style="width:66%;background:repeating-linear-gradient(135deg,#E8CB7D 0 10px,#e3c06a 10px 20px)"></i></div></div>
+  </div>
+</section>
+
+<!-- ===== Opsi B ===== -->
+<section class="opt" style="--ink:#282828;--bg1:#FFFFFF;--bg2:#F7F7F7;--a1:#A9D3B9;--a2:#E8CB7D">
+  <div class="head"><h2>Opsi B · Jade</h2>
+    <p>Hitam, putih & abu dari referensi. Masih bernuansa hijau seperti referensi, tapi giok yang lebih "mewah" dari zaitun. Hijau = keberuntungan, emas = hadiah.</p></div>
+  <div>
+    <div class="sw">
+      <div style="background:#282828;color:#FFFFFF"><b>Lunar Shadow</b><small>Warna utama</small><span>HEX #282828</span></div>
+      <div style="background:#FFFFFF"><b>Clean White</b><small>Dasar 1</small><span>HEX #FFFFFF</span></div>
+      <div style="background:#F7F7F7"><b>Gray Whisper</b><small>Dasar 2</small><span>HEX #F7F7F7</span></div>
+      <div style="background:#A9D3B9"><b>Jade Muda</b><small>Aksen 1</small><span>HEX #A9D3B9</span></div>
+      <div style="background:#E8CB7D"><b>Champagne</b><small>Aksen 2</small><span>HEX #E8CB7D</span></div>
+    </div>
+    <div class="why">
+      <div><b>Makna</b>Hijau giok = keberuntungan & kemakmuran. Tenang untuk operator yang bekerja di bawah tekanan.</div>
+      <div><b>Kelebihan</b>Paling mirip suasana referensi yang kamu suka.</div>
+      <div><b>Kekurangan</b>Hijau biasa dipakai untuk status "sah/sukses", jadi status perlu ikon ✓ supaya tidak tertukar dengan warna brand.</div>
+    </div>
+  </div>
+  <div class="ui">
+    <div class="row"><div style="font-size:22px;font-weight:600">Doorprize</div><span class="chip" style="background:#282828;color:#FFFFFF;margin-left:auto">Show</span><span class="chip" style="background:#FFFFFF">Setup</span></div>
+    <div class="card"><div class="row"><span class="lbl">Sedang tampil</span><span class="chip" style="background:#A9D3B9;margin-left:auto">● Reveal</span></div>
+      <div class="row" style="margin-top:16px"><div class="ico" style="background:#E8CB7D">★</div><div><div class="big">247</div></div><div style="margin-left:12px"><div style="font-weight:600;font-size:18px">Rizky Pratama</div><div style="font-size:14px;color:#8A8A8A">Motor Matic</div></div></div></div>
+    <div class="btn" style="background:#282828;color:#FFFFFF">Sah · Lanjut <span style="background:#A9D3B9;color:#282828;border-radius:50%;width:30px;height:30px;display:grid;place-items:center">→</span></div>
+    <div class="row" style="gap:12px"><div class="btn" style="flex:1;background:#FFFFFF">Kembali</div><div class="btn" style="flex:1;background:#F2D3CB">Hangus</div></div>
+    <div class="card"><div class="row"><span class="lbl">Grand Prize</span><span style="margin-left:auto;font-weight:600">2/3</span></div><div class="bar" style="margin-top:12px"><i style="width:66%;background:repeating-linear-gradient(135deg,#A9D3B9 0 10px,#9bcaad 10px 20px)"></i></div></div>
+  </div>
+</section>
+<!-- ===== Opsi C ===== -->
+<section class="opt" style="--ink:#282828;--bg1:#FFFFFF;--bg2:#F7F7F7;--a1:#CBD77E;--a2:#E6CA9A">
+  <div class="head"><h2>Opsi C · Referensi apa adanya</h2>
+    <p>Palet referensi tanpa perubahan, sebagai pembanding.</p></div>
+  <div>
+    <div class="sw">
+      <div style="background:#282828;color:#FFFFFF"><b>Lunar Shadow</b><small>Warna utama</small><span>HEX #282828</span></div>
+      <div style="background:#FFFFFF"><b>Clean White</b><small>Dasar 1</small><span>HEX #FFFFFF</span></div>
+      <div style="background:#F7F7F7"><b>Gray Whisper</b><small>Dasar 2</small><span>HEX #F7F7F7</span></div>
+      <div style="background:#CBD77E"><b>Gentle Olive</b><small>Aksen 1</small><span>HEX #CBD77E</span></div>
+      <div style="background:#E6CA9A"><b>Winter Hazel</b><small>Aksen 2</small><span>HEX #E6CA9A</span></div>
+    </div>
+    <div class="why">
+      <div><b>Kelebihan</b>Segar, ramah, modern.</div>
+      <div><b>Kekurangan</b>Zaitun terasa "smart home / eco", kurang bernuansa hadiah & perayaan.</div>
+      <div><b>Risiko</b>Identik dengan referensi, sehingga brand kurang punya ciri sendiri.</div>
+    </div>
+  </div>
+  <div class="ui">
+    <div class="row"><div style="font-size:22px;font-weight:600">Doorprize</div><span class="chip" style="background:#282828;color:#FFFFFF;margin-left:auto">Show</span><span class="chip" style="background:#FFFFFF">Setup</span></div>
+    <div class="card"><div class="row"><span class="lbl">Sedang tampil</span><span class="chip" style="background:#CBD77E;margin-left:auto">● Reveal</span></div>
+      <div class="row" style="margin-top:16px"><div class="ico" style="background:#E6CA9A">★</div><div><div class="big">247</div></div><div style="margin-left:12px"><div style="font-weight:600;font-size:18px">Rizky Pratama</div><div style="font-size:14px;color:#8A8A8A">Motor Matic</div></div></div></div>
+    <div class="btn" style="background:#282828;color:#FFFFFF">Sah · Lanjut <span style="background:#CBD77E;color:#282828;border-radius:50%;width:30px;height:30px;display:grid;place-items:center">→</span></div>
+    <div class="row" style="gap:12px"><div class="btn" style="flex:1;background:#FFFFFF">Kembali</div><div class="btn" style="flex:1;background:#F2D3CB">Hangus</div></div>
+    <div class="card"><div class="row"><span class="lbl">Grand Prize</span><span style="margin-left:auto;font-weight:600">2/3</span></div><div class="bar" style="margin-top:12px"><i style="width:66%;background:repeating-linear-gradient(135deg,#CBD77E 0 10px,#bfcc6c 10px 20px)"></i></div></div>
+  </div>
+</section>
+</body>
+</html>
