@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>UI: sistem warna identitas vs fungsi</title>
+<!--
+  Aturan: warna IDENTITAS (champagne, rose) hanya untuk brand & dekorasi, tidak pernah di tombol.
+  Warna FUNGSI dipilih menurut arti aksi: jalan/sah = jade, bahaya/hangus = merah lembut,
+  peringatan = oranye, info = biru. Tombol utama = Lunar Shadow.
+-->
+<style>
+@font-face { font-family: Sora; src: url(fonts/Sora.woff2) format("woff2"); font-weight: 300 700; }
+:root {
+  --ink:#282828; --w:#FFFFFF; --g:#F7F7F7; --line:#ECECEC; --mut:#8A8A8A;
+  /* identitas */ --champ:#E8CB7D; --rose:#EBC2B5;
+  /* fungsi */ --go:#A9D3B9; --go-t:#2F7A55; --go-bg:#E6F3EB;
+  --dng:#F2B8AE; --dng-t:#B4483D; --dng-bg:#FBE6E2;
+  --warn-t:#A35B16; --warn-bg:#FDEBD8; --info-t:#3B6FB6; --info-bg:#E5EDF8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Sora, sans-serif; color: var(--ink); background: #ddd; }
+.frame { width: 1920px; height: 1080px; position: relative; overflow: hidden; background: var(--g); margin-bottom: 40px; }
+.top { height: 84px; display: flex; align-items: center; gap: 22px; padding: 0 36px; }
+.logo { display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 22px; }
+.mark { width: 38px; height: 38px; border-radius: 12px; background: var(--champ); display: grid; place-items: center; position: relative; }
+.mark::after { content: "★"; font-size: 18px; color: var(--ink); }
+.mark i { position: absolute; right: -4px; top: -4px; width: 14px; height: 14px; border-radius: 50%; background: var(--rose); border: 2px solid var(--g); }
+.seg { display: flex; background: var(--w); border-radius: 99px; padding: 5px; gap: 4px; }
+.seg span { padding: 10px 22px; border-radius: 99px; font-size: 15px; font-weight: 600; color: var(--mut); }
+.seg span.on { background: var(--ink); color: var(--w); }
+.sp { flex: 1; }
+.card { background: var(--w); border-radius: 28px; padding: 26px 28px; }
+.lbl { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--mut); font-weight: 600; }
+.h { font-size: 30px; font-weight: 600; letter-spacing: -.01em; }
+.row { display: flex; align-items: center; gap: 12px; }
+.btn { border-radius: 99px; padding: 16px 26px; font-weight: 600; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; gap: 12px; white-space: nowrap; }
+.btn .c { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 16px; color: var(--ink); }
+.b-pri { background: var(--ink); color: var(--w); }
+.b-sec { background: var(--w); color: var(--ink); border: 1px solid var(--line); }
+.b-ghost { background: var(--g); color: var(--ink); }
+.b-dng { background: var(--dng-bg); color: var(--dng-t); }
+.b-dis { background: #EFEFEF; color: #B9B9B9; }
+.chip { font-size: 12px; font-weight: 600; padding: 7px 14px; border-radius: 99px; display: inline-flex; gap: 6px; align-items: center; white-space: nowrap; }
+.c-go { background: var(--go-bg); color: var(--go-t); }
+.c-dng { background: var(--dng-bg); color: var(--dng-t); }
+.c-warn { background: var(--warn-bg); color: var(--warn-t); }
+.c-info { background: var(--info-bg); color: var(--info-t); }
+.c-ink { background: var(--ink); color: var(--w); }
+.c-neu { background: var(--g); color: var(--mut); }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.field { background: var(--g); border-radius: 16px; padding: 14px 18px; font-size: 15px; display: flex; justify-content: space-between; align-items: center; }
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+td, th { padding: 14px 10px; text-align: left; border-bottom: 1px solid var(--line); }
+th { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--mut); font-weight: 600; }
+.mini { border-radius: 22px; overflow: hidden; }
+.kbd { font-size: 11px; font-weight: 600; padding: 3px 7px; border-radius: 6px; background: rgba(255,255,255,.18); }
+.b-sec .kbd, .b-dng .kbd { background: var(--g); color: var(--mut); }
+.legend { position: absolute; left: 36px; bottom: 26px; font-size: 13px; color: var(--mut); display: flex; gap: 22px; align-items: center; }
+.legend b { color: var(--ink); }
+.sw { width: 14px; height: 14px; border-radius: 5px; display: inline-block; vertical-align: -2px; margin-right: 6px; }
+</style>
+</head>
+<body>
+
+<!-- ================= U0 SISTEM WARNA ================= -->
+<div class="frame" id="u0-sistem-warna" style="background:#fff;padding:70px 90px">
+  <div class="row" style="align-items:baseline"><div style="font-size:44px;font-weight:600">Sistem warna UI</div><div style="margin-left:auto;max-width:720px;color:var(--mut);font-size:16px;line-height:1.6">Warna identitas untuk brand & suasana. Warna fungsi untuk aksi & status, dipilih sesuai artinya, tidak terikat palet identitas.</div></div>
+  <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:40px;margin-top:50px">
+    <div>
+      <div class="lbl" style="margin-bottom:16px">Identitas · tidak untuk tombol</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="background:var(--ink);color:#fff;border-radius:26px;height:190px;padding:22px;display:flex;flex-direction:column"><b>Lunar Shadow</b><span style="margin-top:auto;font-size:13px;opacity:.8">#282828 · utama</span></div>
+        <div style="background:var(--g);border-radius:26px;height:190px;padding:22px;display:flex;flex-direction:column;border:1px solid var(--line)"><b>White / Gray Whisper</b><span style="margin-top:auto;font-size:13px;opacity:.7">#FFFFFF · #F7F7F7</span></div>
+        <div style="background:var(--champ);border-radius:26px;height:190px;padding:22px;display:flex;flex-direction:column"><b>Champagne</b><span style="margin-top:auto;font-size:13px;opacity:.75">#E8CB7D · aksen identitas</span></div>
+        <div style="background:var(--rose);border-radius:26px;height:190px;padding:22px;display:flex;flex-direction:column"><b>Rose Quartz</b><span style="margin-top:auto;font-size:13px;opacity:.75">#EBC2B5 · aksen identitas</span></div>
+      </div>
+      <div style="margin-top:20px;font-size:15px;line-height:1.7;color:#5e5e5e">Dipakai untuk: logo, badge pemenang ★, ilustrasi & layar kosong, progres show, sorotan dekoratif.</div>
+    </div>
+    <div>
+      <div class="lbl" style="margin-bottom:16px">Fungsi · tombol & status</div>
+      <table>
+        <tr><th>Arti</th><th>Warna</th><th>Contoh</th></tr>
+        <tr><td><b>Aksi utama</b></td><td><span class="sw" style="background:var(--ink)"></span>#282828</td><td><span class="btn b-pri" style="padding:12px 20px">Mulai show</span></td></tr>
+        <tr><td><b>Jalan / lanjut / sah</b></td><td><span class="sw" style="background:var(--go)"></span>#A9D3B9 · teks #2F7A55</td><td class="row"><span class="btn b-pri" style="padding:10px 12px 10px 20px">Sah · Lanjut <span class="c" style="background:var(--go)">→</span></span><span class="chip c-go">✓ Sah</span></td></tr>
+        <tr><td><b>Bahaya / hapus / hangus</b></td><td><span class="sw" style="background:var(--dng)"></span>#FBE6E2 · teks #B4483D</td><td class="row"><span class="btn b-dng" style="padding:12px 20px">Hangus</span><span class="chip c-dng">✕ Hangus</span></td></tr>
+        <tr><td><b>Peringatan</b></td><td><span class="sw" style="background:#F6C99A"></span>#FDEBD8 · teks #A35B16</td><td><span class="chip c-warn">! 3 duplikat dilewati</span></td></tr>
+        <tr><td><b>Info</b></td><td><span class="sw" style="background:#B9CDEB"></span>#E5EDF8 · teks #3B6FB6</td><td><span class="chip c-info">i Tersimpan otomatis</span></td></tr>
+        <tr><td><b>Sekunder / netral</b></td><td><span class="sw" style="background:#fff;border:1px solid var(--line)"></span>putih + garis</td><td class="row"><span class="btn b-sec" style="padding:12px 20px">Kembali</span><span class="btn b-dis" style="padding:12px 20px">Nonaktif</span></td></tr>
+      </table>
+      <div style="margin-top:20px;font-size:15px;line-height:1.7;color:#5e5e5e">Status selalu memakai <b>ikon + teks</b>, tidak hanya warna, supaya tidak ambigu dan tetap terbaca oleh orang dengan buta warna.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= U1 OPERATOR ================= -->
+<div class="frame" id="u1-operator">
+  <div class="top">
+    <div class="logo"><div class="mark"><i></i></div>Doorprize</div>
+    <div class="seg"><span>Setup</span><span class="on">Show</span></div>
+    <div class="sp"></div>
+    <span class="chip c-go"><span class="dot" style="background:var(--go-t)"></span>Layar LED terhubung</span>
+    <span class="chip c-info">i Tersimpan otomatis</span>
+    <span class="btn b-sec" style="padding:12px 20px">Layar hitam <span class="kbd">B</span></span>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 460px;gap:24px;padding:4px 36px 36px">
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div class="card" style="padding:22px">
+        <div class="row" style="margin-bottom:16px"><div><div class="lbl">Sedang tampil di LED</div><div class="h" style="font-size:24px;margin-top:4px">Reveal pemenang · Motor Matic</div></div><span class="chip c-ink" style="margin-left:auto"><span class="dot" style="background:#ff6b5b"></span>LIVE</span><span class="chip c-neu">HOLD · menunggu MC</span></div>
+        <div class="mini" style="height:500px"><img src="render/f10-reveal.jpg" style="width:100%;height:100%;object-fit:cover"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 2fr 1fr;gap:14px">
+        <span class="btn b-sec" style="padding:24px">◀ Kembali <span class="kbd">PgUp</span></span>
+        <span class="btn b-pri" style="padding:16px 16px 16px 30px;justify-content:space-between"><span><span style="font-size:19px">Sah · Lanjut</span><br><span style="font-size:13px;font-weight:400;opacity:.7">Berikutnya: Penutup</span></span><span class="c" style="background:var(--go);width:52px;height:52px;font-size:22px">→</span></span>
+        <span class="btn b-dng" style="padding:24px">Hangus <span class="kbd">H×2</span></span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div class="card">
+        <div class="lbl" style="margin-bottom:18px">Progres show</div>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div><div class="row" style="font-size:15px;font-weight:600">Sesi 1<span class="chip c-go" style="margin-left:auto">✓ Selesai</span></div></div>
+          <div><div class="row" style="font-size:15px;font-weight:600">Sesi 2<span class="chip c-go" style="margin-left:auto">✓ Selesai</span></div></div>
+          <div><div class="row" style="font-size:15px;font-weight:600">Grand Prize<span style="margin-left:auto">2/3</span></div><div style="height:10px;border-radius:9px;background:var(--g);margin-top:10px;overflow:hidden"><div style="width:66%;height:100%;border-radius:9px;background:repeating-linear-gradient(135deg,var(--champ) 0 10px,#e2c068 10px 20px)"></div></div></div>
+        </div>
+      </div>
+      <div class="card" style="flex:1">
+        <div class="row" style="margin-bottom:6px"><div class="lbl">Pemenang</div><span class="btn b-sec" style="margin-left:auto;padding:9px 16px;font-size:13px">Export Excel</span></div>
+        <table>
+          <tr><td><span class="chip" style="background:var(--champ);color:var(--ink)">★ 247</span></td><td><b>Rizky Pratama</b><div style="font-size:12px;color:var(--mut)">Motor Matic</div></td><td style="text-align:right"><span class="chip c-ink">Tampil</span></td></tr>
+          <tr><td style="font-weight:600">091</td><td><b>Citra Wijaya</b><div style="font-size:12px;color:var(--mut)">Paket Liburan Bali</div></td><td style="text-align:right"><span class="chip c-go">✓ Sah</span></td></tr>
+          <tr><td style="font-weight:600;color:var(--mut);text-decoration:line-through">356</td><td style="color:var(--mut)"><b style="text-decoration:line-through">Joko Santoso</b><div style="font-size:12px">Paket Liburan Bali</div></td><td style="text-align:right"><span class="chip c-dng">✕ Hangus</span></td></tr>
+          <tr><td style="font-weight:600">412</td><td><b>Maya Hidayat</b><div style="font-size:12px;color:var(--mut)">Logam Mulia 10 gram</div></td><td style="text-align:right"><span class="chip c-go">✓ Sah</span></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="legend"><span><span class="sw" style="background:var(--champ)"></span><b>Identitas</b>: logo, badge ★, progres</span><span><span class="sw" style="background:var(--go)"></span><b>Fungsi</b>: lanjut/sah</span><span><span class="sw" style="background:var(--dng)"></span>hangus</span></div>
+</div>
+
+<!-- ================= U2 SETUP PESERTA ================= -->
+<div class="frame" id="u2-setup-peserta">
+  <div class="top">
+    <div class="logo"><div class="mark"><i></i></div>Doorprize</div>
+    <div class="seg"><span class="on">Setup</span><span>Show</span></div>
+    <div class="sp"></div>
+    <span class="chip c-info">i Tersimpan otomatis · 09.41</span>
+    <span class="btn b-sec" style="padding:12px 20px">Gladi</span>
+    <span class="btn b-pri" style="padding:8px 8px 8px 22px">Mulai show <span class="c" style="background:var(--go)">→</span></span>
+  </div>
+  <div style="display:grid;grid-template-columns:300px 1fr;gap:24px;padding:4px 36px 36px">
+    <div class="card" style="padding:20px;display:flex;flex-direction:column;gap:6px;height:930px">
+      <div class="lbl" style="margin:6px 10px 12px">Langkah</div>
+      <div class="row" style="padding:14px;border-radius:18px"><span class="chip c-go" style="padding:5px 9px">✓</span><div><b>Acara</b><div style="font-size:12px;color:var(--mut)">Judul & logo</div></div></div>
+      <div class="row" style="padding:14px;border-radius:18px"><span class="chip c-go" style="padding:5px 9px">✓</span><div><b>Tampilan</b><div style="font-size:12px;color:var(--mut)">Gala Emas · KV</div></div></div>
+      <div class="row" style="padding:14px;border-radius:18px;background:var(--ink);color:#fff"><span class="chip" style="padding:5px 10px;background:#fff;color:var(--ink)">3</span><div><b>Peserta</b><div style="font-size:12px;opacity:.7">Upload & pilih kolom</div></div></div>
+      <div class="row" style="padding:14px;border-radius:18px"><span class="chip c-neu" style="padding:5px 10px">4</span><div><b>Sesi & hadiah</b><div style="font-size:12px;color:var(--mut)">Belum diisi</div></div></div>
+      <div class="row" style="padding:14px;border-radius:18px"><span class="chip c-neu" style="padding:5px 10px">5</span><div><b>Gaya undian</b><div style="font-size:12px;color:var(--mut)">Buka digit</div></div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div class="row"><div><div class="lbl">Langkah 3</div><div class="h">Peserta</div></div>
+        <div class="seg" style="margin-left:auto"><span>Buat nomor kupon</span><span>Paste dari Excel</span><span class="on">Upload file</span></div></div>
+      <div class="card row" style="gap:20px">
+        <div style="width:58px;height:58px;border-radius:18px;background:var(--go-bg);color:var(--go-t);display:grid;place-items:center;font-weight:700">XLS</div>
+        <div><b>peserta-gathering-2026.xlsx</b><div style="font-size:13px;color:var(--mut);margin-top:2px">Sheet 1 · 512 baris</div></div>
+        <span class="chip c-go" style="margin-left:auto">✓ Terbaca</span>
+        <span class="btn b-sec" style="padding:12px 20px">Ganti file</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 420px;gap:18px">
+        <div class="card">
+          <div class="row" style="margin-bottom:16px"><div class="lbl">Pilih kolom</div><span style="margin-left:auto;font-size:13px;color:var(--mut)">5 baris pertama</span></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:10px">
+            <div><div style="font-size:12px;color:var(--mut);margin-bottom:6px">Nomor (wajib)</div><div class="field" style="background:var(--ink);color:#fff">Kolom A · No Kupon <span>▾</span></div></div>
+            <div><div style="font-size:12px;color:var(--mut);margin-bottom:6px">Nama</div><div class="field">Kolom B · Nama <span>▾</span></div></div>
+            <div><div style="font-size:12px;color:var(--mut);margin-bottom:6px">Info tambahan</div><div class="field">Kolom D · Divisi <span>▾</span></div></div>
+          </div>
+          <table>
+            <tr><th>Nomor</th><th>Nama</th><th>Info</th></tr>
+            <tr><td><b>001</b></td><td>Andi Pratama</td><td style="color:var(--mut)">Finance</td></tr>
+            <tr><td><b>002</b></td><td>Budi Santoso</td><td style="color:var(--mut)">IT</td></tr>
+            <tr><td><b>003</b></td><td>Citra Wijaya</td><td style="color:var(--mut)">Marketing</td></tr>
+            <tr style="background:var(--warn-bg)"><td><b>003</b></td><td>Citra Wijaya</td><td><span class="chip c-warn">! Duplikat</span></td></tr>
+            <tr><td><b>004</b></td><td>Raden Mas Muhammad Hendra Kusumawardhana…</td><td><span class="chip c-info">i Disingkat di layar</span></td></tr>
+          </table>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div class="card" style="text-align:center;padding:34px 28px;position:relative;overflow:hidden">
+            <div style="position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,rgba(232,203,125,.35),transparent 40%),radial-gradient(circle at 85% 80%,rgba(235,194,181,.4),transparent 40%)"></div>
+            <div style="position:relative"><div class="lbl">Siap diundi</div><div style="font-size:84px;font-weight:600;letter-spacing:-.03em;line-height:1.1;margin-top:8px">500</div><div style="color:var(--mut)">peserta</div></div>
+          </div>
+          <div class="card">
+            <div class="lbl" style="margin-bottom:14px">Hasil pembersihan</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div class="row"><span class="chip c-warn">! 7 duplikat</span><span style="font-size:14px;color:var(--mut)">dilewati</span></div>
+              <div class="row"><span class="chip c-warn">! 5 baris kosong</span><span style="font-size:14px;color:var(--mut)">dilewati</span></div>
+              <div class="row"><span class="chip c-info">i 3 nama panjang</span><span style="font-size:14px;color:var(--mut)">disingkat di layar</span></div>
+            </div>
+            <span class="btn b-ghost" style="margin-top:18px;width:100%;padding:13px">Lihat detail</span>
+          </div>
+          <span class="btn b-pri" style="padding:10px 10px 10px 26px;justify-content:space-between">Simpan & lanjut ke Sesi <span class="c" style="background:var(--go);width:44px;height:44px">→</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= U3 SETUP SESI & HADIAH + DIALOG ================= -->
+<div class="frame" id="u3-setup-sesi-dialog">
+  <div class="top">
+    <div class="logo"><div class="mark"><i></i></div>Doorprize</div>
+    <div class="seg"><span class="on">Setup</span><span>Show</span></div>
+    <div class="sp"></div>
+    <span class="btn b-pri" style="padding:8px 8px 8px 22px">Mulai show <span class="c" style="background:var(--go)">→</span></span>
+  </div>
+  <div style="padding:4px 36px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+    <div class="card" style="display:flex;flex-direction:column;gap:12px">
+      <div class="row"><div class="h" style="font-size:22px">Sesi 1</div><span class="chip c-neu" style="margin-left:auto">4 hadiah · 8 pemenang</span></div>
+      <div class="row" style="background:var(--g);border-radius:18px;padding:12px"><div style="width:56px;height:56px;border-radius:14px;background:#e9e9e9"></div><div><b>Voucher Belanja</b><div style="font-size:12px;color:var(--mut)">× 3</div></div><span style="margin-left:auto;color:var(--mut)">⋮⋮</span></div>
+      <div class="row" style="background:var(--g);border-radius:18px;padding:12px"><div style="width:56px;height:56px;border-radius:14px;background:#e9e9e9"></div><div><b>Smartwatch</b><div style="font-size:12px;color:var(--mut)">× 2</div></div><span style="margin-left:auto;color:var(--mut)">⋮⋮</span></div>
+      <div class="row" style="background:var(--g);border-radius:18px;padding:12px"><div style="width:56px;height:56px;border-radius:14px;background:#e9e9e9"></div><div><b>Air Fryer</b><div style="font-size:12px;color:var(--mut)">× 2</div></div><span style="margin-left:auto;color:var(--mut)">⋮⋮</span></div>
+      <span class="btn b-ghost" style="padding:13px">+ Tambah hadiah</span>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:12px">
+      <div class="row"><div class="h" style="font-size:22px">Grand Prize</div><span class="chip" style="margin-left:auto;background:var(--champ)">★ Sesi utama</span></div>
+      <div class="row" style="background:var(--g);border-radius:18px;padding:12px"><div style="width:56px;height:56px;border-radius:14px;background:#e9e9e9"></div><div><b>Logam Mulia 10 gram</b><div style="font-size:12px;color:var(--mut)">× 1</div></div></div>
+      <div class="row" style="background:var(--g);border-radius:18px;padding:12px;border:2px dashed #d4d4d4"><div style="width:56px;height:56px;border-radius:14px;background:#fff;display:grid;place-items:center;color:var(--mut);font-size:22px">+</div><div><b>Motor Matic</b><div style="font-size:12px;color:var(--warn-t)">! Foto belum diupload</div></div></div>
+      <span class="btn b-ghost" style="padding:13px">+ Tambah hadiah</span>
+    </div>
+    <div class="card" style="display:grid;place-items:center;text-align:center;border:2px dashed #dcdcdc;background:transparent">
+      <div><div style="width:84px;height:84px;margin:0 auto 16px;border-radius:26px;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:34px">+</div><b style="font-size:18px">Tambah sesi</b><div style="font-size:14px;color:var(--mut);margin-top:6px;max-width:260px">Bagi hadiah ke beberapa sesi supaya penonton penasaran sampai akhir.</div></div>
+    </div>
+  </div>
+  <!-- overlay dialog -->
+  <div style="position:absolute;inset:0;background:rgba(40,40,40,.35);display:grid;place-items:center">
+    <div class="card" style="width:560px;padding:34px;border-radius:32px;box-shadow:0 40px 80px -30px rgba(0,0,0,.4)">
+      <div style="width:58px;height:58px;border-radius:18px;background:var(--dng-bg);color:var(--dng-t);display:grid;place-items:center;font-size:24px;font-weight:700">✕</div>
+      <div class="h" style="font-size:26px;margin-top:20px">Hanguskan pemenang ini?</div>
+      <div style="color:var(--mut);margin-top:8px;line-height:1.6;font-size:15px"><b style="color:var(--ink)">247 · Rizky Pratama</b> tidak hadir. Nama tetap tercatat sebagai hangus dan tidak ikut diundi lagi. Hadiah <b style="color:var(--ink)">Motor Matic</b> akan diundi ulang.</div>
+      <div class="row" style="margin-top:26px;gap:12px"><span class="btn b-sec" style="flex:1">Batal</span><span class="btn" style="flex:1;background:var(--dng-t);color:#fff">Ya, hanguskan</span></div>
+    </div>
+  </div>
+  <!-- toast -->
+  <div style="position:absolute;right:36px;bottom:36px;background:var(--ink);color:#fff;border-radius:20px;padding:16px 20px;display:flex;gap:12px;align-items:center;font-size:14px"><span class="c" style="width:28px;height:28px;border-radius:50%;background:var(--go);color:var(--ink);display:grid;place-items:center;font-weight:700">✓</span>Perubahan tersimpan</div>
+</div>
+
+</body>
+</html>
