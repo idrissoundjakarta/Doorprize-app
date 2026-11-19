@@ -177,7 +177,7 @@ Sebelum brainstorming, sempat dibuat prototipe satu file HTML. Kalau saya upload
 - **Tampilan UI operator & setup: terang, warna gading** (bukan putih polos). Mode gelap untuk UI menyusul di update berikutnya. Tampilan **layar LED tidak ikut tema UI**: warnanya mengikuti KV/brand klien.
 - **Gerak di semua adegan:** selain animasi masuk/keluar, adegan *hold* tetap punya gerak halus (foto hadiah melayang, cahaya mengalir, kilau sesekali) supaya tidak garing saat MC bicara. Saat nomor/nama pemenang tampil, gerak dibuat lebih kalem supaya tetap terbaca.
 - **Confetti + suara di Reveal** (lebih heboh untuk Grand Prize).
-- **Gaya undian jadi 5** (tetap tanpa wheel): Buka digit (bawaan), Slot reel, + 3 gaya baru yang dipilih setelah usulan dikonfirmasi (lihat percakapan 18 Nov 2026).
+- **Gaya undian jadi 5** (tetap tanpa wheel): **Buka digit** (bawaan, formal), **Slot reel** (meriah), **Amplop emas** (elegan, ala malam penghargaan, tanpa adegan kocok), **Debu emas** (partikel emas pelan berkumpul jadi nomor), **Sorot cahaya** (nomor seperti ukiran pelat logam, disapu cahaya). Tiap gaya berdiri sendiri, jadi bisa direvisi atau dihapus kalau tidak cocok. Sorot grid ditunda (kurang elegan, sulit dibaca untuk peserta >1.000).
 
 ### Rencana MVP (ringkas)
 
