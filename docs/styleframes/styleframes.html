@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Style frame — aplikasi doorprize</title>
+<!--
+  Sumber style frame (gambar diam untuk persetujuan arah visual).
+  Tiap .frame berukuran 1920×1080 dan di-render jadi PNG oleh render.js.
+  Background di sini adalah tiruan statis dari background generatif WebGL.
+  Palet LED = contoh palet yang diambil dari KV klien (fiktif).
+-->
+<style>
+@font-face { font-family: "Cormorant"; src: url(fonts/CormorantGaramond-600.woff2) format("woff2"); font-weight: 400 700; }
+@font-face { font-family: "Manrope"; src: url(fonts/Manrope-400.woff2) format("woff2"); font-weight: 200 800; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #555; font-family: Manrope, sans-serif; }
+.frame { width: 1920px; height: 1080px; position: relative; overflow: hidden; margin: 0 0 40px; }
+
+/* ================= LED: palet dari KV ================= */
+/* A: KV gelap mewah (gala dinner) */
+.kv-a { --bg1:#1B2747; --bg2:#070B16; --p:#D9B26F; --p2:#F3DDA8; --t:#F7F1E6; --m:#A9B4CC; --glow:rgba(217,178,111,.35); }
+/* B: KV terang (family day) */
+.kv-b { --bg1:#FFF8EE; --bg2:#F6D9C6; --p:#D9483B; --p2:#F2A93B; --t:#2B1D18; --m:#8A6A5C; --glow:rgba(242,169,59,.35); }
+/* C: KV korporat biru */
+.kv-c { --bg1:#0F4C81; --bg2:#051E38; --p:#49D3C3; --p2:#B5F2EA; --t:#FFFFFF; --m:#9CC3E4; --glow:rgba(73,211,195,.30); }
+
+.led { color: var(--t); background: radial-gradient(ellipse 80% 70% at 50% 45%, var(--bg1), var(--bg2)); }
+.led .layer { position: absolute; inset: 0; }
+.bokeh span { position: absolute; border-radius: 50%; background: radial-gradient(circle, var(--glow), transparent 70%); filter: blur(2px); }
+.streak { position: absolute; width: 2600px; height: 240px; left: -340px; background: linear-gradient(90deg, transparent, var(--glow), transparent); filter: blur(40px); opacity: .55; }
+.vignette { background: radial-gradient(ellipse 60% 55% at 50% 50%, transparent 40%, rgba(0,0,0,.35)); }
+.kv-b .vignette { background: radial-gradient(ellipse 60% 55% at 50% 50%, transparent 40%, rgba(160,80,40,.12)); }
+.calm { background: radial-gradient(ellipse 34% 30% at 50% 50%, color-mix(in srgb, var(--bg2) 55%, transparent), transparent); }
+.kv-b .calm { background: radial-gradient(ellipse 34% 30% at 50% 50%, rgba(255,250,242,.7), transparent); }
+
+.brand { position: absolute; top: 64px; left: 96px; display: flex; align-items: center; gap: 22px; z-index: 5; }
+.brand .mark { width: 58px; height: 58px; border-radius: 50%; border: 2px solid var(--p); display: grid; place-items: center; font: 700 22px Manrope; color: var(--p); }
+.brand .co { font: 700 18px Manrope; letter-spacing: .18em; text-transform: uppercase; }
+.brand .ev { font: 500 16px Manrope; color: var(--m); letter-spacing: .06em; margin-top: 2px; }
+.brand.small { transform: scale(.72); transform-origin: top left; opacity: .85; }
+.corner { position: absolute; right: 96px; top: 76px; font: 600 15px Manrope; letter-spacing: .3em; color: var(--m); text-transform: uppercase; z-index: 5; }
+
+.center { position: absolute; inset: 0; display: grid; place-items: center; z-index: 4; text-align: center; }
+.stack { display: flex; flex-direction: column; align-items: center; }
+.kicker { font: 700 22px Manrope; letter-spacing: .5em; text-transform: uppercase; color: var(--p); display: flex; align-items: center; gap: 28px; }
+.kicker::before, .kicker::after { content: ""; width: 90px; height: 1.5px; background: linear-gradient(90deg, transparent, var(--p)); }
+.kicker::after { transform: scaleX(-1); }
+.serif { font-family: Cormorant, serif; font-weight: 600; }
+.gold { background: linear-gradient(180deg, var(--p2) 10%, var(--p) 55%, color-mix(in srgb, var(--p) 70%, #000) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.kv-b .gold { background: linear-gradient(180deg, var(--p2), var(--p) 70%); -webkit-background-clip: text; background-clip: text; }
+.num { font: 800 300px/1 Manrope; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.sub { font: 500 30px Manrope; color: var(--m); }
+.pill { font: 600 24px Manrope; border: 1.5px solid color-mix(in srgb, var(--p) 70%, transparent); color: var(--t); border-radius: 99px; padding: 12px 34px; background: color-mix(in srgb, var(--p) 10%, transparent); }
+.note { position: absolute; left: 96px; bottom: 56px; font: 500 15px Manrope; color: var(--m); opacity: .8; z-index: 6; letter-spacing: .04em; }
+.note b { color: var(--p); font-weight: 700; }
+
+/* foto hadiah: placeholder elegan */
+.photo { width: 520px; height: 400px; border-radius: 28px; position: relative; background: linear-gradient(160deg, color-mix(in srgb, var(--t) 14%, transparent), color-mix(in srgb, var(--t) 4%, transparent)); border: 1px solid color-mix(in srgb, var(--p) 45%, transparent); box-shadow: 0 50px 120px -30px rgba(0,0,0,.6), 0 0 120px -10px var(--glow); display: grid; place-items: center; }
+.kv-b .photo { background: linear-gradient(160deg, #fff, #fff4ea); box-shadow: 0 50px 120px -40px rgba(140,60,30,.35); }
+.photo svg { width: 300px; height: 230px; }
+.photo .tag { position: absolute; bottom: 18px; font: 600 13px Manrope; letter-spacing: .25em; color: var(--m); }
+.reflect { width: 420px; height: 40px; margin-top: 18px; background: radial-gradient(ellipse at center, var(--glow), transparent 70%); filter: blur(6px); }
+
+/* confetti */
+.confetti i { position: absolute; display: block; border-radius: 2px; }
+
+/* ===== gaya undian ===== */
+.digits { display: flex; gap: 26px; }
+.dbox { width: 230px; height: 310px; border-radius: 26px; display: grid; place-items: center; font: 800 230px/1 Manrope; position: relative; border: 1.5px solid color-mix(in srgb, var(--p) 55%, transparent); background: linear-gradient(180deg, color-mix(in srgb, var(--t) 9%, transparent), color-mix(in srgb, var(--t) 2%, transparent)); }
+.dbox.locked { box-shadow: 0 0 80px -10px var(--glow), inset 0 0 40px -20px var(--p); }
+.dbox.spin { overflow: hidden; }
+.dbox.spin .col { display: flex; flex-direction: column; filter: blur(5px); opacity: .7; transform: translateY(-120px); line-height: 1.1; }
+.reel { position: relative; height: 640px; width: 900px; overflow: hidden; -webkit-mask-image: linear-gradient(transparent, #000 32%, #000 68%, transparent); }
+.reel .row { height: 200px; display: grid; place-items: center; font: 800 170px/1 Manrope; }
+.reel .blur { filter: blur(4px); opacity: .6; }
+.band { position: absolute; left: 50%; top: 50%; width: 980px; height: 214px; transform: translate(-50%,-50%); border-top: 1.5px solid var(--p); border-bottom: 1.5px solid var(--p); z-index: 5; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--p) 10%, transparent), transparent); }
+.band::before, .band::after { content: ""; position: absolute; top: 50%; width: 0; height: 0; border: 16px solid transparent; transform: translateY(-50%); }
+.band::before { left: -6px; border-left-color: var(--p); }
+.band::after { right: -6px; border-right-color: var(--p); }
+
+/* amplop emas */
+.env { position: relative; width: 760px; height: 470px; margin-top: 120px; }
+.env .back { position: absolute; inset: 0; border-radius: 18px; background: linear-gradient(160deg, #E9CC8E, #B08A46); box-shadow: 0 60px 120px -30px rgba(0,0,0,.7); }
+.env .card { position: absolute; left: 60px; right: 60px; top: -250px; height: 520px; border-radius: 14px; background: linear-gradient(180deg, #FBF6EA, #EFE3C6); color: #2a2216; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 30px 60px -20px rgba(0,0,0,.5); border: 1px solid #d8c08a; }
+.env .card .lbl { font: 700 18px Manrope; letter-spacing: .5em; color: #9a7a3c; margin-bottom: 10px; }
+.env .card .n { font: 800 180px/1 Manrope; }
+.env .card .rule { width: 160px; height: 1.5px; background: #c7a660; margin: 14px 0; }
+.env .front { position: absolute; left: 0; right: 0; bottom: 0; height: 300px; border-radius: 0 0 18px 18px; background: linear-gradient(170deg, #E2C17F, #A27C3B); clip-path: polygon(0 0, 50% 52%, 100% 0, 100% 100%, 0 100%); }
+.env .flap { position: absolute; left: 0; right: 0; top: -170px; height: 170px; background: linear-gradient(0deg, #D6B370, #F0D79F); clip-path: polygon(0 100%, 50% 0, 100% 100%); opacity: .95; }
+.env .seal { position: absolute; left: 50%; bottom: 150px; width: 76px; height: 76px; margin-left: -38px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #9e2b2b, #5f1414); box-shadow: 0 6px 14px rgba(0,0,0,.4); }
+
+/* sorot cahaya */
+.plate { padding: 70px 120px; border-radius: 22px; background: linear-gradient(160deg, color-mix(in srgb, var(--t) 7%, transparent), color-mix(in srgb, var(--t) 2%, transparent)); border: 1px solid color-mix(in srgb, var(--p) 35%, transparent); }
+.engrave { font: 800 300px/1 Manrope; letter-spacing: -.02em; color: transparent; background: linear-gradient(105deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,.07) 34%, var(--p) 44%, #fff8e6 50%, var(--p) 56%, rgba(255,255,255,.07) 66%, rgba(255,255,255,.07) 100%); -webkit-background-clip: text; background-clip: text; text-shadow: 0 2px 0 rgba(255,255,255,.04), 0 -2px 0 rgba(0,0,0,.4); }
+.beam { position: absolute; width: 260px; height: 1600px; left: 50%; top: 50%; transform: translate(-50%,-50%) rotate(15deg); background: linear-gradient(90deg, transparent, rgba(255,240,205,.16), transparent); filter: blur(30px); z-index: 3; }
+
+/* ================= UI operator/setup: tema gading ================= */
+.ui { --iv:#FBF8F1; --iv2:#F4EFE3; --line:#E6DECB; --ink:#2B2620; --mut:#8C8374; --acc:#9A7B3F; --accbg:#F3EAD6; --ok:#4E8A5B; --danger:#B4483D;
+  background: var(--iv2); color: var(--ink); font-family: Manrope; }
+.ui .top { height: 76px; background: var(--iv); border-bottom: 1px solid var(--line); display: flex; align-items: center; padding: 0 32px; gap: 28px; }
+.ui .logo { font: 600 26px Cormorant; letter-spacing: .02em; }
+.ui .logo small { font: 600 12px Manrope; letter-spacing: .3em; color: var(--mut); margin-left: 10px; }
+.ui .tabs { display: flex; gap: 6px; background: var(--iv2); padding: 5px; border-radius: 12px; border: 1px solid var(--line); }
+.ui .tabs span { padding: 8px 20px; border-radius: 8px; font: 600 15px Manrope; color: var(--mut); }
+.ui .tabs span.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(60,40,10,.12); }
+.ui .sp { flex: 1; }
+.ui .btn { border: 1px solid var(--line); background: #fff; border-radius: 12px; padding: 11px 20px; font: 600 15px Manrope; color: var(--ink); display: inline-flex; align-items: center; gap: 10px; }
+.ui .btn.pri { background: var(--ink); color: var(--iv); border-color: var(--ink); }
+.ui .btn.gold { background: var(--acc); color: #fff; border-color: var(--acc); }
+.ui .btn.dng { color: var(--danger); border-color: #E8C3BC; background: #FFF7F5; }
+.ui .card { background: var(--iv); border: 1px solid var(--line); border-radius: 18px; }
+.ui .lbl { font: 700 12px Manrope; letter-spacing: .18em; text-transform: uppercase; color: var(--mut); }
+.ui h2 { font: 600 34px Cormorant; }
+.ui .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); display: inline-block; }
+.ui .field { border: 1px solid var(--line); background: #fff; border-radius: 10px; padding: 12px 14px; font: 500 15px Manrope; }
+.ui .sw { width: 54px; height: 54px; border-radius: 12px; border: 1px solid rgba(0,0,0,.08); }
+.ui .chip { padding: 6px 12px; border-radius: 99px; background: var(--accbg); color: var(--acc); font: 700 12px Manrope; letter-spacing: .06em; }
+.ui table { width: 100%; border-collapse: collapse; font: 500 15px Manrope; }
+.ui td { padding: 12px 8px; border-bottom: 1px solid var(--line); }
+.ui .mini { position: relative; border-radius: 12px; overflow: hidden; }
+</style>
+</head>
+<body>
+
+<!-- ============ 01 LOOPING ============ -->
+<div class="frame led kv-a" id="f01-looping" data-bg="1">
+  <div class="layer bokeh"></div><div class="layer"><div class="streak" style="top:180px;transform:rotate(-8deg)"></div><div class="streak" style="top:760px;transform:rotate(-8deg);opacity:.3"></div></div><div class="layer vignette"></div><div class="layer calm"></div>
+  <div class="brand"><div class="mark">CS</div><div><div class="co">PT Contoh Sejahtera</div><div class="ev">Annual Gathering 2026</div></div></div>
+  <div class="center"><div class="stack">
+    <div class="kicker">Sesi berikutnya</div>
+    <div class="serif gold" style="font-size:150px;line-height:1.05;margin:18px 0 34px">Grand Prize</div>
+    <div class="photo" style="width:380px;height:260px;filter:blur(10px);opacity:.75"><svg viewBox="0 0 300 230"><use href="#ic-car"/></svg></div>
+    <div class="sub" style="margin-top:36px">3 hadiah utama menanti</div>
+  </div></div>
+  <div class="note"><b>Looping</b> · background mengalir pelan, foto hadiah unggulan disamarkan & bernapas, judul berkilau sesekali</div>
+</div>
+
+<!-- ============ 02 OPENER ============ -->
+<div class="frame led kv-a" id="f02-opener" data-bg="2">
+  <div class="layer bokeh"></div><div class="layer vignette"></div>
+  <div class="layer" style="background:radial-gradient(ellipse 30% 40% at 50% 50%, var(--glow), transparent 70%)"></div>
+  <div class="beam" style="transform:translate(-50%,-50%) rotate(0deg);width:900px;opacity:.6"></div>
+  <div class="brand"><div class="mark">CS</div><div><div class="co">PT Contoh Sejahtera</div><div class="ev">Annual Gathering 2026</div></div></div>
+  <div class="center"><div class="stack">
+    <div class="kicker">Sesi 3</div>
+    <div class="serif gold" style="font-size:230px;line-height:1;margin-top:20px">Grand Prize</div>
+  </div></div>
+  <div class="note"><b>Opener sesi</b> · ±3 dtk otomatis · cahaya terkumpul di tengah, judul membesar dari blur</div>
+</div>
+
+<!-- ============ 03 SHOWCASE ============ -->
+<div class="frame led kv-a" id="f03-showcase" data-bg="3">
+  <div class="layer bokeh"></div><div class="layer"><div class="streak" style="top:300px;transform:rotate(6deg);opacity:.35"></div></div><div class="layer vignette"></div>
+  <div class="brand"><div class="mark">CS</div><div><div class="co">PT Contoh Sejahtera</div><div class="ev">Annual Gathering 2026</div></div></div>
+  <div class="corner">Grand Prize · Hadiah 3 dari 3</div>
+  <div class="center"><div class="stack">
+    <div class="photo" style="transform:rotate(-2deg)"><svg viewBox="0 0 300 230"><use href="#ic-car"/></svg><div class="tag">FOTO HADIAH</div></div>
+    <div class="reflect"></div>
+    <div class="serif" style="font-size:96px;line-height:1.05;margin-top:14px">Motor Matic</div>
+    <div class="sub" style="margin-top:14px"><span style="color:var(--p);font-weight:700">1 pemenang</span></div>
+  </div></div>
+  <div class="note"><b>Showcase hadiah</b> · foto masuk lalu melayang pelan (naik-turun & miring halus), kilau menyapu foto tiap ±6 dtk</div>
+</div>
+
+<!-- ============ 04 READY ============ -->
+<div class="frame led kv-a" id="f04-ready" data-bg="4">
+  <div class="layer bokeh"></div><div class="layer vignette"></div><div class="layer calm"></div>
+  <div class="brand"><div class="mark">CS</div><div><div class="co">PT Contoh Sejahtera</div><div class="ev">Annual Gathering 2026</div></div></div>
+  <div class="corner">Motor Matic · Pemenang 1 dari 1</div>
+  <div class="center"><div class="stack" style="position:relative">
+    <svg width="640" height="640" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-56%)">
+      <circle cx="320" cy="320" r="300" fill="none" stroke="var(--p)" stroke-opacity=".18" stroke-width="2"/>
+      <circle cx="320" cy="320" r="300" fill="none" stroke="var(--p)" stroke-width="3" stroke-dasharray="1300 600" stroke-linecap="round" transform="rotate(-90 320 320)"/>
+      <circle cx="320" cy="320" r="270" fill="none" stroke="var(--p)" stroke-opacity=".12" stroke-width="1" stroke-dasharray="4 10"/>
+    </svg>
+    <div class="num gold" style="font-size:250px">487</div>
+    <div class="sub" style="margin-top:6px;font-size:34px;color:var(--t)">peserta siap diundi</div>
+  </div></div>
+  <div class="note"><b>Ready</b> · angka menghitung naik, cincin berputar pelan & "bernapas" makin cepat menandakan undian segera dimulai</div>
+</div>
+
+<!-- ============ 05 BUKA DIGIT ============ -->
+<div class="frame led kv-a" id="f05-gaya-buka-digit" data-bg="5">
+  <div class="layer bokeh"></div><div class="layer vignette"></div><div class="layer" style="background:radial-gradient(ellipse 45% 45% at 50% 50%, var(--glow), transparent 70%);opacity:.5"></div>
+  <div class="brand small"><div class="mark">CS</div><div><div class="co">PT Contoh Sejahtera</div><div class="ev">Annual Gathering 2026</div></div></div>
+  <div class="center"><div class="stack">
+    <div class="kicker" style="margin-bottom:56px">Motor Matic</div>
+    <div class="digits">
+      <div class="dbox locked gold-box"><span class="gold">2</span></div>
+      <div class="dbox locked"><span class="gold">4</span></div>
+      <div class="dbox spin"><div class="col"><span>3</span><span>8</span><span>1</span><span>6</span></div></div>
+    </div>
+  </div></div>
+  <div class="note"><b>Gaya 1 · Buka digit</b> (formal) · tiap digit berputar lalu terkunci dengan kilau emas, jeda dramatis sebelum digit terakhir</div>
+</div>
+
+<!-- ============ 06 SLOT REEL ============ -->
+<div class="frame led kv-a" id="f06-gaya-slot-reel" data-bg="6">
+  <div class="layer bokeh"></div><div class="layer vignette"></div>
+  <div class="brand small"><div class="mark">CS</div><div><div class="co">PT Contoh Sejahtera</div><div class="ev">Annual Gathering 2026</div></div></div>
+  <div class="center"><div class="stack">
+    <div class="kicker" style="margin-bottom:20px">Motor Matic</div>
+    <div style="position:relative">
+      <div class="band"></div>
+      <div class="reel"><div style="transform:translateY(-180px)">
+        <div class="row blur">118</div><div class="row blur" style="filter:blur(2px)">392</div><div class="row gold">247</div><div class="row blur" style="filter:blur(2px)">065</div><div class="row blur">431</div>
+      </div></div>
+    </div>
+  </div></div>
+  <div class="note"><b>Gaya 2 · Slot reel</b> (meriah) · kolom nomor meluncur cepat dengan motion blur lalu melambat anggun ke pemenang</div>
+</div>
+
+<!-- ============ 07 AMPLOP EMAS ============ -->
+<div class="frame led kv-a" id="f07-gaya-amplop-emas" data-bg="7">
+  <div class="layer bokeh"></div><div class="layer vignette"></div><div class="layer" style="background:radial-gradient(ellipse 40% 50% at 50% 40%, var(--glow), transparent 70%);opacity:.6"></div>
+  <div class="brand small"><div class="mark">CS</div><div><div class="co">PT Contoh Sejahtera</div><div class="ev">Annual Gathering 2026</div></div></div>
+  <div class="center"><div class="stack">
+    <div class="env">
+      <div class="back"></div>
+      <div class="flap"></div>
+      <div class="card"><div class="lbl">PEMENANG</div><div class="rule"></div><div class="n">247</div><div class="rule"></div><div style="font:600 20px Manrope;color:#9a7a3c;letter-spacing:.2em">MOTOR MATIC</div></div>
+      <div class="front"></div>
+    </div>
+  </div></div>
+  <div class="note"><b>Gaya 3 · Amplop emas</b> (elegan) · amplop maju pelan ke tengah, segel lepas, kartu naik keluar lalu membesar jadi layar Reveal</div>
+</div>
+
+<!-- ============ 08 DEBU EMAS ============ -->
+<div class="frame led kv-a" id="f08-gaya-debu-emas" data-bg="8">
+  <div class="layer bokeh"></div><div class="layer vignette"></div>
+  <canvas class="layer dust" width="1920" height="1080" data-text="247"></canvas>
+  <div class="center" style="place-items:start center;padding-top:250px"><div class="kicker">Motor Matic</div></div>
+  <div class="brand small"><div class="mark">CS</div><div><div class="co">PT Contoh Sejahtera</div><div class="ev">Annual Gathering 2026</div></div></div>
+  <div class="note"><b>Gaya 4 · Debu emas</b> (elegan + wah) · ribuan partikel emas mengalir pelan lalu berkumpul membentuk nomor, sisa debu berkilau</div>
+</div>
+
+<!-- ============ 09 SOROT CAHAYA ============ -->
+<div class="frame led kv-a" id="f09-gaya-sorot-cahaya" data-bg="9">
+  <div class="layer bokeh" style="opacity:.5"></div><div class="layer vignette"></div>
+  <div class="beam"></div>
+  <div class="brand small"><div class="mark">CS</div><div><div class="co">PT Contoh Sejahtera</div><div class="ev">Annual Gathering 2026</div></div></div>
+  <div class="center"><div class="stack">
+    <div class="kicker" style="margin-bottom:46px">Motor Matic</div>
+    <div class="plate"><div class="engrave">247</div></div>
+  </div></div>
+  <div class="note"><b>Gaya 5 · Sorot cahaya</b> (elegan) · nomor samar seperti ukiran pelat logam, berkas cahaya menyapu lalu seluruh nomor menyala emas</div>
+</div>
+
+<!-- ============ 10 REVEAL A ============ -->
+<div class="frame led kv-a" id="f10-reveal" data-bg="10">
+  <div class="layer bokeh"></div><div class="layer vignette"></div><div class="layer" style="background:radial-gradient(ellipse 40% 40% at 50% 45%, var(--glow), transparent 70%)"></div>
+  <div class="layer confetti" data-colors="#D9B26F,#F3DDA8,#F7F1E6,#B8954F"></div>
+  <div class="brand small"><div class="mark">CS</div><div><div class="co">PT Contoh Sejahtera</div><div class="ev">Annual Gathering 2026</div></div></div>
+  <div class="center"><div class="stack">
+    <div class="kicker">Selamat</div>
+    <div class="num gold" style="margin-top:20px">247</div>
+    <div style="font:700 84px Manrope;margin-top:14px">Rizky Pratama</div>
+    <div class="sub" style="margin-top:8px">Divisi Finance</div>
+    <div class="pill" style="margin-top:34px">Motor Matic</div>
+  </div></div>
+  <div class="note"><b>Reveal</b> · KV gelap · nomor "menghantam" masuk, confetti emas & suara, lalu gerak dibuat kalem supaya MC bisa bicara</div>
+</div>
+
+<!-- ============ 11 REVEAL B ============ -->
+<div class="frame led kv-b" id="f11-reveal-kv-terang" data-bg="11">
+  <div class="layer bokeh"></div><div class="layer vignette"></div><div class="layer calm"></div>
+  <div class="layer confetti" data-colors="#D9483B,#F2A93B,#3BA7A0,#7B5CC8,#F07C8F"></div>
+  <div class="brand small"><div class="mark">CS</div><div><div class="co">PT Contoh Sejahtera</div><div class="ev">Family Day 2026</div></div></div>
+  <div class="center"><div class="stack">
+    <div class="kicker">Selamat</div>
+    <div class="num gold" style="margin-top:20px">138</div>
+    <div style="font:700 84px Manrope;margin-top:14px">Dewi Lestari</div>
+    <div class="sub" style="margin-top:8px">Divisi Marketing</div>
+    <div class="pill" style="margin-top:34px">Sepeda Lipat</div>
+  </div></div>
+  <div class="note"><b>Reveal · contoh KV terang</b> · warna seluruh layar diambil dari KV klien (misalnya family day)</div>
+</div>
+
+<!-- ============ 12 REVEAL C ============ -->
+<div class="frame led kv-c" id="f12-reveal-kv-korporat" data-bg="12">
+  <div class="layer bokeh"></div><div class="layer"><div class="streak" style="top:200px;transform:rotate(-10deg)"></div></div><div class="layer vignette"></div>
+  <div class="layer confetti" data-colors="#49D3C3,#B5F2EA,#FFFFFF,#5B8DEF"></div>
+  <div class="brand small"><div class="mark">CS</div><div><div class="co">PT Contoh Sejahtera</div><div class="ev">Townhall & Gathering 2026</div></div></div>
+  <div class="center"><div class="stack">
+    <div class="kicker">Selamat</div>
+    <div class="num gold" style="margin-top:20px">0412</div>
+    <div style="font:700 84px Manrope;margin-top:14px">Hendra Kurniawan</div>
+    <div class="sub" style="margin-top:8px">Divisi IT</div>
+    <div class="pill" style="margin-top:34px">Smartphone</div>
+  </div></div>
+  <div class="note"><b>Reveal · contoh KV korporat biru</b> · template sama, palet berbeda</div>
+</div>
+
+<!-- ============ 13 UI SETUP ============ -->
+<div class="frame ui" id="f13-ui-setup">
+  <div class="top">
+    <div class="logo">Doorprize<small>STUDIO</small></div>
+    <div class="tabs"><span class="on">Setup</span><span>Show</span></div>
+    <div class="sp"></div>
+    <span style="font:500 14px Manrope;color:var(--mut)">Tersimpan otomatis · 09.41</span>
+    <span class="btn">Gladi</span><span class="btn pri">Mulai show →</span>
+  </div>
+  <div style="display:grid;grid-template-columns:280px 1fr 520px;height:1004px">
+    <!-- langkah -->
+    <div style="border-right:1px solid var(--line);padding:30px 22px;display:flex;flex-direction:column;gap:6px;background:var(--iv)">
+      <div class="lbl" style="margin:0 12px 14px">Langkah setup</div>
+      <div style="padding:14px;border-radius:12px;display:flex;gap:12px;align-items:center"><span style="color:var(--ok);font-weight:800">✓</span><div><b>Acara</b><div style="font-size:13px;color:var(--mut)">Judul & logo</div></div></div>
+      <div style="padding:14px;border-radius:12px;display:flex;gap:12px;align-items:center;background:var(--accbg)"><span style="color:var(--acc);font-weight:800">2</span><div><b>Tampilan</b><div style="font-size:13px;color:var(--mut)">Template, warna, font</div></div></div>
+      <div style="padding:14px;border-radius:12px;display:flex;gap:12px;align-items:center"><span style="color:var(--ok);font-weight:800">✓</span><div><b>Peserta</b><div style="font-size:13px;color:var(--mut)">500 peserta</div></div></div>
+      <div style="padding:14px;border-radius:12px;display:flex;gap:12px;align-items:center"><span style="color:var(--mut);font-weight:800">4</span><div><b>Sesi & hadiah</b><div style="font-size:13px;color:var(--mut)">3 sesi · 10 hadiah</div></div></div>
+      <div style="padding:14px;border-radius:12px;display:flex;gap:12px;align-items:center"><span style="color:var(--mut);font-weight:800">5</span><div><b>Gaya undian</b><div style="font-size:13px;color:var(--mut)">Amplop emas · Normal</div></div></div>
+    </div>
+    <!-- isi -->
+    <div style="padding:40px 48px;display:flex;flex-direction:column;gap:30px;overflow:hidden">
+      <div><div class="lbl">Langkah 2</div><h2>Tampilan show</h2></div>
+      <div class="card" style="padding:26px;display:flex;gap:26px;align-items:center">
+        <div style="width:200px;height:112px;border-radius:12px;background:linear-gradient(135deg,#1B2747,#070B16);position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:radial-gradient(circle at 70% 30%,rgba(217,178,111,.6),transparent 50%)"></div><div style="position:absolute;left:14px;bottom:12px;color:#F3DDA8;font:600 20px Cormorant">KV Gala</div></div>
+        <div style="flex:1"><div style="font:700 17px Manrope">Ambil warna dari KV</div><div style="color:var(--mut);font-size:14px;margin:4px 0 14px">KV hanya dipakai untuk mengambil palet, tidak ditampilkan di layar.</div>
+          <div style="display:flex;gap:10px;align-items:center"><div class="sw" style="background:#0B1020"></div><div class="sw" style="background:#1B2747"></div><div class="sw" style="background:#D9B26F;outline:3px solid var(--acc);outline-offset:2px"></div><div class="sw" style="background:#F3DDA8"></div><div class="sw" style="background:#F7F1E6"></div><span class="chip" style="margin-left:8px">5 WARNA DITEMUKAN</span></div></div>
+        <span class="btn">Ganti KV</span>
+      </div>
+      <div><div class="lbl" style="margin-bottom:12px">Template background</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+          <div class="card" style="padding:12px;outline:2px solid var(--acc)"><div style="height:120px;border-radius:10px;background:radial-gradient(circle at 30% 40%,rgba(217,178,111,.55),transparent 40%),radial-gradient(circle at 75% 65%,rgba(217,178,111,.35),transparent 35%),linear-gradient(135deg,#1B2747,#070B16)"></div><div style="font:700 15px Manrope;margin:10px 4px 2px">Gala Emas</div><div style="font-size:13px;color:var(--mut);margin:0 4px">Bokeh & sapuan cahaya · formal</div></div>
+          <div class="card" style="padding:12px"><div style="height:120px;border-radius:10px;background:linear-gradient(115deg,transparent 30%,rgba(217,178,111,.5) 45%,transparent 55%),linear-gradient(65deg,transparent 40%,rgba(217,178,111,.35) 52%,transparent 62%),linear-gradient(135deg,#1B2747,#070B16)"></div><div style="font:700 15px Manrope;margin:10px 4px 2px">Neon Party</div><div style="font-size:13px;color:var(--mut);margin:0 4px">Berkas cahaya & haze · meriah</div></div>
+          <div class="card" style="padding:12px"><div style="height:120px;border-radius:10px;background:repeating-linear-gradient(90deg,rgba(217,178,111,.18) 0 1px,transparent 1px 28px),repeating-linear-gradient(0deg,rgba(217,178,111,.18) 0 1px,transparent 1px 28px),linear-gradient(135deg,#1B2747,#070B16)"></div><div style="font:700 15px Manrope;margin:10px 4px 2px">Corporate Navy</div><div style="font-size:13px;color:var(--mut);margin:0 4px">Grid & garis halus · bersih</div></div>
+        </div><div style="font-size:13px;color:var(--mut);margin-top:10px">Warna template mengikuti palet KV di atas.</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div><div class="lbl" style="margin-bottom:10px">Font judul</div><div class="field" style="font:600 22px Cormorant;display:flex;justify-content:space-between">Cormorant Garamond <span style="font:500 14px Manrope;color:var(--mut)">▾</span></div></div>
+        <div><div class="lbl" style="margin-bottom:10px">Font nomor & nama</div><div class="field" style="font:700 17px Manrope;display:flex;justify-content:space-between">Manrope <span style="font:500 14px Manrope;color:var(--mut)">▾</span></div></div>
+      </div>
+      <div><div class="lbl" style="margin-bottom:10px">Peredup background</div><div style="height:8px;border-radius:9px;background:linear-gradient(90deg,var(--acc) 35%,var(--line) 35%);position:relative"><div style="position:absolute;left:35%;top:50%;width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid var(--acc);transform:translate(-50%,-50%)"></div></div></div>
+    </div>
+    <!-- pratinjau -->
+    <div style="border-left:1px solid var(--line);padding:40px 32px;background:var(--iv);display:flex;flex-direction:column;gap:16px">
+      <div class="lbl">Pratinjau langsung</div>
+      <div class="mini" style="height:256px"><img data-mini="f10-reveal" style="width:100%;height:100%;object-fit:cover"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="chip">LOOPING</span><span class="chip" style="background:#fff;color:var(--mut);border:1px solid var(--line)">SHOWCASE</span><span class="chip" style="background:#fff;color:var(--mut);border:1px solid var(--line)">UNDI</span><span class="chip" style="background:var(--acc);color:#fff">REVEAL</span></div>
+      <div style="font-size:13px;color:var(--mut);line-height:1.6">Klik adegan untuk melihat tampilannya dengan data contoh. Teks panjang otomatis mengecil.</div>
+      <div class="card" style="padding:16px;margin-top:auto;background:#fff"><div style="font:700 14px Manrope;margin-bottom:6px">Cek keterbacaan</div><div style="font-size:13px;color:var(--mut);line-height:1.6"><span style="color:var(--ok);font-weight:700">● Kontras baik</span> antara teks dan background (8,2 : 1)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 14 UI OPERATOR ============ -->
+<div class="frame ui" id="f14-ui-operator">
+  <div class="top">
+    <div class="logo">Doorprize<small>STUDIO</small></div>
+    <div class="tabs"><span>Setup</span><span class="on">Show</span></div>
+    <div class="sp"></div>
+    <span style="display:flex;align-items:center;gap:8px;font:600 14px Manrope;color:var(--ok)"><span class="dot"></span>Layar LED terhubung</span>
+    <span class="btn">Layar hitam <kbd style="font:600 12px Manrope;color:var(--mut)">B</kbd></span>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 440px;gap:28px;padding:28px 32px;height:1004px">
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <div style="display:flex;justify-content:space-between;align-items:end"><div><div class="lbl">Sedang tampil di LED</div><div style="font:600 30px Cormorant;margin-top:2px">Reveal pemenang · Motor Matic</div></div><span class="chip">HOLD · MENUNGGU MC</span></div>
+      <div class="mini" style="height:556px;box-shadow:0 20px 50px -25px rgba(60,40,10,.45)"><img data-mini="f10-reveal" style="width:100%;height:100%;object-fit:cover"></div>
+      <div style="display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:14px">
+        <span class="btn" style="justify-content:center;padding:24px;font-size:17px">◀ Kembali</span>
+        <span class="btn gold" style="justify-content:center;padding:24px;font-size:20px;flex-direction:column;gap:4px"><b>SAH · LANJUT ▶</b><span style="font:500 13px Manrope;opacity:.85">Berikutnya: Penutup</span></span>
+        <span class="btn dng" style="justify-content:center;padding:24px;font-size:17px">Hangus → undi ulang</span>
+      </div>
+      <div style="font-size:13px;color:var(--mut)">Clicker: <b>PageDown</b> = lanjut · <b>PageUp</b> = kembali · <b>B</b> = layar hitam · <b>H×2</b> = hangus</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div class="card" style="padding:22px">
+        <div class="lbl" style="margin-bottom:14px">Progres sesi</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div><div style="display:flex;justify-content:space-between;font:600 15px Manrope"><span>Sesi 1</span><span style="color:var(--ok)">8/8 selesai</span></div><div style="height:6px;background:var(--line);border-radius:9px;margin-top:6px"><div style="width:100%;height:100%;background:var(--ok);border-radius:9px"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font:600 15px Manrope"><span>Sesi 2</span><span style="color:var(--ok)">4/4 selesai</span></div><div style="height:6px;background:var(--line);border-radius:9px;margin-top:6px"><div style="width:100%;height:100%;background:var(--ok);border-radius:9px"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font:600 15px Manrope"><span>Grand Prize</span><span style="color:var(--acc)">2/3</span></div><div style="height:6px;background:var(--line);border-radius:9px;margin-top:6px"><div style="width:66%;height:100%;background:var(--acc);border-radius:9px"></div></div></div>
+        </div>
+      </div>
+      <div class="card" style="padding:22px;flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="lbl">Pemenang</div><span class="btn" style="padding:7px 14px;font-size:13px">Export Excel</span></div>
+        <table>
+          <tr><td style="color:var(--acc);font-weight:800">247</td><td><b>Rizky Pratama</b><div style="font-size:12px;color:var(--mut)">Motor Matic</div></td><td style="text-align:right"><span class="chip">TAMPIL</span></td></tr>
+          <tr><td style="font-weight:800">091</td><td><b>Citra Wijaya</b><div style="font-size:12px;color:var(--mut)">Paket Liburan Bali</div></td><td style="text-align:right;color:var(--ok);font-weight:700;font-size:13px">Sah</td></tr>
+          <tr style="opacity:.6"><td style="font-weight:800;text-decoration:line-through">356</td><td><b style="text-decoration:line-through">Joko Santoso</b><div style="font-size:12px;color:var(--mut)">Paket Liburan Bali</div></td><td style="text-align:right;color:var(--danger);font-weight:700;font-size:13px">Hangus</td></tr>
+          <tr><td style="font-weight:800">412</td><td><b>Maya Hidayat</b><div style="font-size:12px;color:var(--mut)">Logam Mulia 10 gram</div></td><td style="text-align:right;color:var(--ok);font-weight:700;font-size:13px">Sah</td></tr>
+          <tr><td style="font-weight:800">018</td><td><b>Fajar Nugroho</b><div style="font-size:12px;color:var(--mut)">Smart TV 43"</div></td><td style="text-align:right;color:var(--ok);font-weight:700;font-size:13px">Sah</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="ic-car" viewBox="0 0 300 230">
+      <g fill="none" stroke="var(--p)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="70" y="100" width="160" height="110" rx="8"/><rect x="58" y="72" width="184" height="34" rx="8"/>
+        <path d="M150 72 V210"/><path d="M150 72 C130 40 95 40 100 60 C104 74 135 72 150 72 C165 72 196 74 200 60 C205 40 170 40 150 72"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<script>
+// Generator acak dengan seed supaya render selalu sama.
+function rng(seed){ return () => (seed = (seed * 16807) % 2147483647) / 2147483647; }
+
+// Bokeh (tiruan background generatif).
+document.querySelectorAll(".frame.led").forEach(f => {
+  const r = rng(+f.dataset.bg * 97 + 13), box = f.querySelector(".bokeh");
+  if (!box) return;
+  for (let i = 0; i < 34; i++) {
+    const s = document.createElement("span"), d = 40 + r() * 220;
+    let x = r() * 1920, y = r() * 1080;
+    if (Math.abs(x - 960) < 520 && Math.abs(y - 540) < 300) x = x < 960 ? x - 520 : x + 520; // tengah tetap kalem
+    Object.assign(s.style, { width: d + "px", height: d + "px", left: x - d / 2 + "px", top: y - d / 2 + "px", opacity: .25 + r() * .6 });
+    box.appendChild(s);
+  }
+});
+
+// Confetti.
+document.querySelectorAll(".confetti").forEach((c, k) => {
+  const r = rng(77 + k), cols = c.dataset.colors.split(",");
+  for (let i = 0; i < 170; i++) {
+    const p = document.createElement("i"), w = 8 + r() * 14, h = w * (.4 + r() * .6);
+    let x = r() * 1920, y = r() * 1080;
+    if (Math.abs(x - 960) < 430 && y > 240 && y < 900 && r() < .8) continue; // jangan menutupi nomor
+    if ((x < 760 && y < 190) || y > 1010) continue; // jangan menutupi logo & catatan
+    Object.assign(p.style, { width: w + "px", height: h + "px", left: x + "px", top: y + "px", background: cols[i % cols.length], transform: `rotate(${r() * 360}deg)`, opacity: .55 + r() * .45, borderRadius: r() < .3 ? "50%" : "2px" });
+    c.appendChild(p);
+  }
+});
+
+// Debu emas: partikel yang berkumpul membentuk nomor.
+document.querySelectorAll("canvas.dust").forEach(cv => {
+  const ctx = cv.getContext("2d"), r = rng(5);
+  const off = document.createElement("canvas"); off.width = 1920; off.height = 1080;
+  const o = off.getContext("2d"); o.fillStyle = "#fff"; o.textAlign = "center"; o.textBaseline = "middle";
+  o.font = "800 380px Manrope"; o.fillText(cv.dataset.text, 960, 560);
+  const data = o.getImageData(0, 0, 1920, 1080).data, pts = [];
+  for (let y = 0; y < 1080; y += 5) for (let x = 0; x < 1920; x += 5) if (data[(y * 1920 + x) * 4 + 3] > 128) pts.push([x, y]);
+  const gold = ["#F3DDA8", "#D9B26F", "#FFF4D6", "#B8954F"];
+  // partikel yang sudah menempel di huruf
+  pts.forEach(([x, y]) => { if (r() < .85) { ctx.fillStyle = gold[(r() * 4) | 0]; ctx.globalAlpha = .55 + r() * .45; const s = 1.5 + r() * 2.5; ctx.beginPath(); ctx.arc(x + (r() - .5) * 4, y + (r() - .5) * 4, s, 0, 7); ctx.fill(); } });
+  // aliran partikel yang masih menuju huruf
+  for (let i = 0; i < 2600; i++) {
+    const [tx, ty] = pts[(r() * pts.length) | 0], a = r() * 6.283, d = 60 + Math.pow(r(), 2) * 900;
+    const x = tx + Math.cos(a) * d * 1.6, y = ty + Math.sin(a) * d * .7;
+    ctx.globalAlpha = Math.max(.08, .8 - d / 1100); ctx.fillStyle = gold[(r() * 4) | 0];
+    ctx.beginPath(); ctx.arc(x, y, .8 + r() * 2, 0, 7); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  ctx.shadowColor = "rgba(243,221,168,.9)"; ctx.shadowBlur = 30;
+  for (let i = 0; i < 40; i++) { const [x, y] = pts[(r() * pts.length) | 0]; ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(x, y, 2 + r() * 2, 0, 7); ctx.fill(); }
+});
+</script>
+</body>
+</html>
