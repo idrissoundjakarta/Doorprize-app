@@ -1,11 +1,30 @@
 import { initialScene } from "./engine";
 import { uid } from "./rng";
-import type { Participant, Session, Settings, ShowState } from "./types";
+import type { Palette, Participant, Session, Settings, ShowState } from "./types";
+
+export const PALETTE_GALA: Palette = {
+  bg1: "#1B2747",
+  bg2: "#070B16",
+  primary: "#D9B26F",
+  primary2: "#F3DDA8",
+  text: "#F7F1E6",
+  muted: "#A9B4CC",
+};
 
 export const DEFAULT_SETTINGS: Settings = {
   eventTitle: "Annual Gathering 2026",
+  companyName: "PT Contoh Sejahtera",
   style: "digit",
   tempo: "normal",
+  sound: true,
+  theme: {
+    template: "gala",
+    palette: PALETTE_GALA,
+    fontTitle: "Cormorant",
+    fontBody: "Manrope",
+    dim: 0.25,
+    quality: "tinggi",
+  },
 };
 
 export function createShow(

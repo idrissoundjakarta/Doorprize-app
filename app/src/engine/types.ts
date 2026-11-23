@@ -12,8 +12,10 @@ export type Prize = {
   id: string;
   name: string;
   qty: number;
-  /** Foto hadiah (data URL). Belum dipakai di prototipe. */
+  /** Foto hadiah (data URL, sudah dikecilkan). */
   photo?: string;
+  /** Gaya undian khusus hadiah ini (kosong = ikut pengaturan acara). */
+  style?: DrawStyle;
 };
 
 export type Session = {
@@ -36,13 +38,40 @@ export type Draw = {
   at: number;
 };
 
-export type DrawStyle = "digit" | "reel";
+export type DrawStyle = "digit" | "reel" | "amplop" | "debu" | "sorot";
 export type Tempo = "cepat" | "normal" | "dramatis";
+export type Template = "gala" | "neon" | "navy";
+
+/** Palet layar show (biasanya diambil dari KV klien). */
+export type Palette = {
+  bg1: string; // warna dasar terang/tengah background
+  bg2: string; // warna dasar gelap/pinggir background
+  primary: string; // aksen utama (nomor, judul)
+  primary2: string; // aksen terang (kilau)
+  text: string; // teks utama
+  muted: string; // teks sekunder
+};
+
+export type Theme = {
+  template: Template;
+  palette: Palette;
+  fontTitle: string;
+  fontBody: string;
+  /** 0..1, peredup background supaya teks terbaca. */
+  dim: number;
+  /** Kualitas background WebGL (hemat untuk laptop lemah). */
+  quality: "tinggi" | "hemat";
+};
 
 export type Settings = {
   eventTitle: string;
+  companyName: string;
+  /** Logo klien (data URL, sudah dikecilkan). */
+  logo?: string;
   style: DrawStyle;
   tempo: Tempo;
+  sound: boolean;
+  theme: Theme;
 };
 
 /**

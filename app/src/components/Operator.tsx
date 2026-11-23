@@ -1,24 +1,50 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SCENE_LABEL, SCENE_MODE, describeNext, firstOpenPrize, getParticipant, remaining } from "@/engine/engine";
+import { SCENE_LABEL, SCENE_MODE, describeNext, eligible, firstOpenPrize, getDraw, getParticipant, getPrize, remaining } from "@/engine/engine";
+import type { ShowState } from "@/engine/types";
 import { download, winnersCsv } from "@/lib/export";
 import { keyToCommand, toggleFullscreen } from "@/lib/keys";
 import { useShowController } from "@/lib/useShowController";
+import { ShowView } from "@/show/ShowView";
+import { unlockAudio } from "@/show/sound";
 import { Setup } from "./Setup";
-import { ShowView } from "./ShowView";
+import { Dialog, Logo, useToast } from "./ui";
 
-/** Jendela operator (layar laptop). Mode satu layar tersedia sebagai cadangan. */
+/** Teks tombol NEXT sesuai adegan, supaya operator tahu persis apa yang terjadi kalau ditekan. */
+function nextButton(state: ShowState): { label: string; sub: string; enabled: boolean } {
+  const sc = state.scene;
+  switch (sc.kind) {
+    case "looping":
+      return { label: "Mulai sesi", sub: `Opener ${state.sessions[sc.session]?.name ?? ""}`, enabled: true };
+    case "opener":
+      return { label: "Opener berjalan…", sub: "Otomatis lanjut ke showcase", enabled: false };
+    case "showcase":
+      return { label: "Siap undi", sub: "Tampilkan jumlah peserta", enabled: true };
+    case "ready":
+      return eligible(state).length === 0 ? { label: "Peserta habis", sub: "Tidak ada peserta yang bisa diundi", enabled: false } : { label: "Undi sekarang", sub: `${eligible(state).length} peserta`, enabled: true };
+    case "draw":
+      return { label: "Mengundi…", sub: "Otomatis ke layar pemenang", enabled: false };
+    case "reveal":
+      return { label: "Sah · Lanjut", sub: describeNext(state).replace(/^NEXT \(sah\) → /, "Berikutnya: ").replace(/ · H×2 → Hangus$/, ""), enabled: true };
+    case "end":
+      return { label: "Show selesai", sub: "Export daftar pemenang", enabled: false };
+  }
+}
+
 export function Operator() {
-  const { state, setState, dispatch, command, hangusArmed, showConnected, saveFailed } = useShowController();
+  const { state, setState, dispatch, command, hangusNow, hangusArmed, showConnected, saveFailed } = useShowController();
   const [tab, setTab] = useState<"show" | "setup">("show");
   const [solo, setSolo] = useState(false);
   const [panel, setPanel] = useState(false);
+  const [dialog, setDialog] = useState<null | "hangus" | "restart">(null);
+  const [toast, showToast] = useToast();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      unlockAudio();
       const cmd = keyToCommand(e);
-      if (!cmd) return;
+      if (!cmd || dialog) return;
       if (tab === "setup" && !solo) return; // jangan ganggu pengisian setup
       e.preventDefault();
       if (cmd === "fullscreen") toggleFullscreen();
@@ -27,46 +53,78 @@ export function Operator() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [command, tab, solo]);
+  }, [command, tab, solo, dialog]);
 
   if (!state) return <div className="waiting">Memuat…</div>;
 
   const sc = state.scene;
+  const nb = nextButton(state);
+  const revealDraw = sc.kind === "reveal" ? getDraw(state, sc.drawId) : undefined;
+  const revealWho = revealDraw && getParticipant(state, revealDraw.participantId);
+  const revealPrize = sc.kind === "reveal" ? getPrize(state, sc.session, sc.prize) : undefined;
 
   const controls = (
-    <div className="controls">
-      <button onClick={() => command("back")} title="PageUp / ←">◀ BACK</button>
-      <button className="primary next" disabled={SCENE_MODE[sc.kind] === "auto"} onClick={() => command("next")} title="PageDown / → / Spasi">NEXT ▶</button>
-      <button className={`danger ${hangusArmed ? "armed" : ""}`} disabled={sc.kind !== "reveal"} onClick={() => command("hangus")} title="H dua kali">
-        {hangusArmed ? "Yakin? Klik lagi" : "Hangus → undi ulang"}
+    <div className="op-controls">
+      <button className="btn b-sec" onClick={() => command("back")} disabled={!(sc.kind === "ready" || sc.kind === "showcase")}>◀ Kembali <span className="kbd">PgUp</span></button>
+      <button className="btn b-pri btn-next" disabled={!nb.enabled} onClick={() => command("next")}>
+        <span>
+          {nb.label}
+          <small>{nb.sub}</small>
+        </span>
+        <span className="go-ico">{SCENE_MODE[sc.kind] === "auto" ? "…" : "→"}</span>
       </button>
-      <button className={state.blank ? "active" : ""} onClick={() => command("blank")} title="B">
-        {state.blank ? "Tampilkan konten" : "Layar hitam"}
-      </button>
+      <button className="btn b-dng" disabled={sc.kind !== "reveal"} onClick={() => setDialog("hangus")}>Hangus <span className="kbd">H×2</span></button>
     </div>
   );
 
   const status = (
-    <div className="status">
-      <div><b>{SCENE_LABEL[sc.kind]}</b> <span className="mode">{SCENE_MODE[sc.kind]}</span></div>
-      <div className="next-hint">{describeNext(state)}</div>
-      {hangusArmed && <div className="warn">Tekan H sekali lagi (3 detik) untuk menghanguskan pemenang ini.</div>}
-      {saveFailed && <div className="warn">Gagal menyimpan otomatis!</div>}
+    <div className="row wrap">
+      <div className="grow op-status-title">
+        <div className="lbl">Sedang tampil di LED</div>
+        <div className="h2" style={{ marginTop: 3 }}>
+          {SCENE_LABEL[sc.kind]}
+          {"session" in sc && state.sessions[sc.session] ? ` · ${state.sessions[sc.session].name}` : ""}
+        </div>
+      </div>
+      <span className="chip c-ink"><span className="dot" style={{ background: "#ff6b5b" }} />LIVE</span>
+      <span className="chip c-neu">{SCENE_MODE[sc.kind] === "auto" ? "AUTO · berjalan sendiri" : "HOLD · menunggu MC"}</span>
+      {state.blank && <span className="chip c-warn">! Layar hitam aktif</span>}
     </div>
+  );
+
+  const dialogs = (
+    <>
+      {dialog === "hangus" && (
+        <Dialog title="Hanguskan pemenang ini?" confirm="Ya, hanguskan" onCancel={() => setDialog(null)} onConfirm={() => { hangusNow(); setDialog(null); showToast("Pemenang dihanguskan, siap undi ulang"); }}>
+          <b style={{ color: "var(--ink)" }}>{revealWho?.number}{revealWho?.name ? ` · ${revealWho.name}` : ""}</b> tidak hadir. Tetap tercatat sebagai hangus dan tidak ikut diundi lagi. Hadiah <b style={{ color: "var(--ink)" }}>{revealPrize?.name}</b> akan diundi ulang.
+        </Dialog>
+      )}
+      {dialog === "restart" && (
+        <Dialog title="Mulai ulang show?" confirm="Ya, mulai ulang" onCancel={() => setDialog(null)} onConfirm={() => { dispatch({ type: "RESTART", now: Date.now() }); setDialog(null); showToast("Show dimulai dari awal"); }}>
+          Semua hasil undian (termasuk yang hangus) akan dihapus. Biasanya dipakai setelah gladi. Export dulu kalau masih dibutuhkan.
+        </Dialog>
+      )}
+      {toast}
+    </>
   );
 
   // ---------- Mode satu layar (cadangan) ----------
   if (solo) {
     return (
-      <main className="show-window">
-        <ShowView state={state} />
+      <main className="solo">
+        <ShowView state={state} audio />
         {panel && (
           <div className="solo-panel">
             {status}
+            {hangusArmed && <span className="chip c-dng">✕ Tekan H sekali lagi untuk hangus</span>}
             {controls}
-            <button onClick={() => { setSolo(false); setPanel(false); if (document.fullscreenElement) void document.exitFullscreen(); }}>Keluar mode satu layar</button>
+            <div className="row">
+              <button className={`btn b-sm ${state.blank ? "b-pri" : "b-sec"}`} onClick={() => command("blank")}>Layar hitam <span className="kbd">B</span></button>
+              <button className="btn b-sm b-ghost right" onClick={() => { setSolo(false); setPanel(false); if (document.fullscreenElement) void document.exitFullscreen(); }}>Keluar mode satu layar</button>
+            </div>
           </div>
         )}
+        {dialogs}
       </main>
     );
   }
@@ -89,72 +147,102 @@ export function Operator() {
     window.open(url, "doorprize-show", features);
   };
 
-  const exportCsv = () => download(`pemenang-${new Date().toISOString().slice(0, 10)}.csv`, winnersCsv(state));
-  const restart = () => confirm("Mulai ulang show dari awal? Semua hasil undian akan dihapus.") && dispatch({ type: "RESTART", now: Date.now() });
+  const exportCsv = () => {
+    download(`pemenang-${new Date().toISOString().slice(0, 10)}.csv`, winnersCsv(state));
+    showToast("Daftar pemenang diexport");
+  };
+  const allPrizes = state.sessions.flatMap((s) => s.prizes);
 
   return (
-    <div className="operator">
+    <div className="op">
       <header className="topbar">
-        <strong>Doorprize · Operator</strong>
-        <nav>
-          <button className={tab === "show" ? "active" : ""} onClick={() => setTab("show")}>Show</button>
-          <button className={tab === "setup" ? "active" : ""} onClick={() => setTab("setup")}>Setup</button>
-        </nav>
-        <span className={`conn ${showConnected ? "ok" : ""}`}>{showConnected ? "● Layar show terhubung" : "○ Layar show belum dibuka"}</span>
-        <button onClick={openShowWindow}>Buka jendela show</button>
-        <button onClick={() => { setSolo(true); setPanel(false); toggleFullscreen(); }}>Mode satu layar</button>
+        <Logo />
+        <div className="seg">
+          <button className={tab === "setup" ? "on" : ""} onClick={() => setTab("setup")}>Setup</button>
+          <button className={tab === "show" ? "on" : ""} onClick={() => setTab("show")}>Show</button>
+        </div>
+        <div className="grow" />
+        {showConnected ? <span className="chip c-go"><span className="dot" style={{ background: "var(--go-t)" }} />Layar LED terhubung</span> : <span className="chip c-neu">○ Layar LED belum dibuka</span>}
+        {saveFailed ? <span className="chip c-dng">✕ Gagal menyimpan</span> : <span className="chip c-info">i Tersimpan otomatis</span>}
+        {tab === "show" && (
+          <>
+            <button className={`btn b-sm ${state.blank ? "b-pri" : "b-sec"}`} onClick={() => command("blank")}>Layar hitam <span className="kbd">B</span></button>
+            <button className="btn b-sm b-sec" onClick={openShowWindow}>Buka jendela show</button>
+            <button className="btn b-sm b-ghost" onClick={() => { setSolo(true); setPanel(false); toggleFullscreen(); }}>Mode satu layar</button>
+          </>
+        )}
       </header>
 
       {tab === "setup" ? (
-        <Setup state={state} setState={setState} />
+        <Setup state={state} setState={setState} onDone={() => setTab("show")} toast={showToast} />
       ) : (
-        <div className="show-tab">
-          <div className="left">
-            <div className="preview"><ShowView state={state} /></div>
-            {status}
+        <div className="op-main">
+          <div className="col">
+            <div className="card col" style={{ padding: 18 }}>
+              {status}
+              <div className="preview"><ShowView state={state} /></div>
+            </div>
+            {hangusArmed && <span className="chip c-dng" style={{ alignSelf: "start" }}>✕ Tekan H sekali lagi (3 detik) untuk menghanguskan</span>}
             {controls}
-            <p className="hint">Tombol: NEXT = PageDown/→/Spasi · BACK = PageUp/← · B = layar hitam · H×2 = hangus · F = fullscreen (di jendela show)</p>
+            <div className="small muted">Clicker: <b>PageDown/→/Spasi</b> = lanjut · <b>PageUp/←</b> = kembali · <b>B</b> = layar hitam · <b>H×2</b> = hangus · <b>F</b> = fullscreen di jendela show</div>
           </div>
-          <div className="right">
-            <h3>Sesi</h3>
-            <ul className="sessions">
+
+          <div className="col">
+            <div className="card col">
+              <div className="lbl">Progres show</div>
               {state.sessions.map((s, i) => {
-                const left = s.prizes.reduce((n, p) => n + remaining(state, p), 0);
                 const total = s.prizes.reduce((n, p) => n + p.qty, 0);
-                const done = firstOpenPrize(state, i) === null;
+                const done = total - s.prizes.reduce((n, p) => n + remaining(state, p), 0);
+                const finished = firstOpenPrize(state, i) === null;
+                const current = "session" in sc && sc.session === i;
                 return (
-                  <li key={s.id} className={"session" in sc && sc.session === i ? "current" : ""}>
-                    <span>{s.name}</span>
-                    <span className="muted">{total - left}/{total}</span>
-                    <button disabled={done || sc.kind === "draw" || sc.kind === "reveal"} onClick={() => dispatch({ type: "JUMP_SESSION", session: i, now: Date.now() })}>Lompat</button>
-                  </li>
+                  <div key={s.id} className={`sess ${current ? "current" : ""}`}>
+                    <div className="row">
+                      <b style={{ fontSize: 15 }}>{s.name}</b>
+                      {finished ? <span className="chip c-go right">✓ Selesai</span> : <span className="right small" style={{ fontWeight: 600 }}>{done}/{total}</span>}
+                      {!finished && !current && <button className="btn b-sm b-ghost" disabled={sc.kind === "draw" || sc.kind === "reveal"} onClick={() => dispatch({ type: "JUMP_SESSION", session: i, now: Date.now() })}>Lompat</button>}
+                    </div>
+                    {!finished && <div className="progress" style={{ marginTop: 8 }}><i style={{ width: `${(done / Math.max(1, total)) * 100}%` }} /></div>}
+                  </div>
                 );
               })}
-            </ul>
-            <h3>Pemenang <span className="count">{state.draws.filter((d) => d.status === "sah").length}</span></h3>
-            <table className="winners">
-              <tbody>
-                {[...state.draws].reverse().map((d) => {
-                  const who = getParticipant(state, d.participantId);
-                  const prize = state.sessions.flatMap((s) => s.prizes).find((p) => p.id === d.prizeId);
-                  return (
-                    <tr key={d.id} className={d.status}>
-                      <td>{who?.number}</td>
-                      <td>{who?.name}</td>
-                      <td>{prize?.name}</td>
-                      <td>{d.status === "pending" ? "tampil" : d.status}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            <div className="row">
-              <button onClick={exportCsv} disabled={state.draws.length === 0}>Export CSV</button>
-              <button className="danger" onClick={restart}>Mulai ulang show</button>
+            </div>
+
+            <div className="card col">
+              <div className="row">
+                <div className="lbl">Pemenang</div>
+                <span className="chip c-champ">★ {state.draws.filter((d) => d.status === "sah").length}</span>
+                <button className="btn b-sm b-sec right" onClick={exportCsv} disabled={state.draws.length === 0}>Export Excel</button>
+              </div>
+              <div className="winners">
+                {state.draws.length === 0 ? (
+                  <div className="muted small" style={{ padding: "18px 0", textAlign: "center" }}>Belum ada pemenang. Tekan <b>Mulai sesi</b> untuk memulai.</div>
+                ) : (
+                  <table className="t">
+                    <tbody>
+                      {[...state.draws].reverse().map((d) => {
+                        const who = getParticipant(state, d.participantId);
+                        const prize = allPrizes.find((p) => p.id === d.prizeId);
+                        return (
+                          <tr key={d.id} className={d.status}>
+                            <td style={{ width: 76 }}>{d.status === "pending" ? <span className="chip c-champ">★ {who?.number}</span> : <b className="strike">{who?.number}</b>}</td>
+                            <td><b className="strike">{who?.name ?? "—"}</b><div className="small muted">{prize?.name}</div></td>
+                            <td style={{ textAlign: "right" }}>
+                              {d.status === "pending" ? <span className="chip c-ink">Tampil</span> : d.status === "sah" ? <span className="chip c-go">✓ Sah</span> : <span className="chip c-dng">✕ Hangus</span>}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+              <button className="btn b-sm b-ghost" onClick={() => setDialog("restart")}>Mulai ulang show</button>
             </div>
           </div>
         </div>
       )}
+      {dialogs}
     </div>
   );
 }

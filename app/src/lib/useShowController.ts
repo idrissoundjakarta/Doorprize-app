@@ -5,7 +5,7 @@ import { autoDuration, reduce, resumeAfterReload } from "@/engine/engine";
 import { sampleShow } from "@/engine/sample";
 import type { Action, ShowState } from "@/engine/types";
 import { openChannel, type Command, type Message } from "./channel";
-import { loadShow, saveShow } from "./storage";
+import { loadShow, requestPersistence, saveShow } from "./storage";
 
 export const HANGUS_WINDOW_MS = 3000;
 
@@ -25,16 +25,14 @@ export function useShowController() {
 
   // Muat data tersimpan (atau data contoh) saat dibuka.
   useEffect(() => {
-    const saved = loadShow();
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage hanya ada di browser
-    setState(saved ? resumeAfterReload(saved, Date.now()) : sampleShow());
+    void loadShow().then((saved) => setState(saved ? resumeAfterReload(saved, Date.now()) : sampleShow()));
+    void requestPersistence();
   }, []);
 
   // Simpan otomatis setiap ada perubahan.
   useEffect(() => {
     stateRef.current = state;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- status hasil simpan
-    if (state) setSaveFailed(!saveShow(state));
+    if (state) void saveShow(state).then((ok) => setSaveFailed(!ok));
   }, [state]);
 
   const dispatch = useCallback((a: Action) => setState((s) => (s ? reduce(s, a) : s)), []);
@@ -114,5 +112,11 @@ export function useShowController() {
   }, []);
   const showConnected = now - showAliveAt < 3000;
 
-  return { state, setState, dispatch, command, hangusArmed, showConnected, saveFailed };
+  /** Hangus langsung (setelah konfirmasi dialog di jendela operator). */
+  const hangusNow = useCallback(() => {
+    disarm();
+    dispatch({ type: "HANGUS", now: Date.now() });
+  }, [disarm, dispatch]);
+
+  return { state, setState, dispatch, command, hangusNow, hangusArmed, showConnected, saveFailed };
 }
