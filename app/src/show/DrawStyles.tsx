@@ -149,7 +149,7 @@ function Amplop({ state, winner, p, audio, duration }: DrawProps) {
     <div className="env-stage" style={{ transform: `translateY(${(1 - a) * 40 + float + card * 10}cqmin) scale(${0.6 + 0.4 * a + zoom * 0.12})`, opacity: a }}>
       <div className="env">
         <div className="env-back" />
-        <div className="env-card" style={{ transform: `translateY(${-card * 62}%)` }}>
+        <div className="env-card" style={{ transform: `translateY(${-card * 62}%)`, opacity: flap > 0.55 ? 1 : 0 }}>
           <div className="env-lbl">PEMENANG</div>
           <div className="env-rule" />
           <div className="env-num" style={{ fontSize: fit(winner.number, 17, 34) }}>{winner.number}</div>
@@ -197,8 +197,8 @@ function Debu({ state, winner, audio }: DrawProps) {
     const cols = [primary2, primary, light ? primary : "#FFF6DD"];
     const parts = pts.map(([tx, ty], i) => {
       const ang = (hash(i, 1) / 4294967296) * Math.PI * 2;
-      const rad = H * (0.45 + (hash(i, 2) / 4294967296) * 0.9);
-      return { tx, ty, sx: W / 2 + Math.cos(ang) * rad * 1.5, sy: H / 2 + Math.sin(ang) * rad * 0.8, d: (hash(i, 3) / 4294967296) * 0.32, s: 0.8 + (hash(i, 4) / 4294967296) * 1.8, c: cols[i % 3], tw: hash(i, 5) % 100 };
+      const rad = H * (0.18 + (hash(i, 2) / 4294967296) * 0.55);
+      return { tx, ty, sx: W / 2 + Math.cos(ang) * rad * 1.7, sy: H / 2 + Math.sin(ang) * rad * 0.9, d: 0.05 + (hash(i, 3) / 4294967296) * 0.3, s: 0.8 + (hash(i, 4) / 4294967296) * 1.8, c: cols[i % 3], tw: hash(i, 5) % 100 };
     });
     const dust = Array.from({ length: 160 }, (_, i) => ({ x: (hash(i, 9) / 4294967296) * W, y: (hash(i, 10) / 4294967296) * H, s: 0.6 + (hash(i, 11) % 100) / 60 }));
     const u = H / 1080;
@@ -216,16 +216,17 @@ function Debu({ state, winner, audio }: DrawProps) {
         ctx.fill();
       }
       for (const q of parts) {
-        const t = easeInOut(clamp((p - q.d) / (0.84 - q.d)));
-        const sw = (1 - t) * 2.2;
+        const t = easeInOut(clamp((p - q.d) / (0.72 - q.d)));
+        const sw = (1 - t) * 2.6 + (1 - t) * p * 3;
         const cx = W / 2, cy = H / 2;
         const rx = q.sx - cx, ry = q.sy - cy;
         const sx = cx + rx * Math.cos(sw) - ry * Math.sin(sw), sy = cy + rx * Math.sin(sw) + ry * Math.cos(sw);
         const x = sx + (q.tx - sx) * t, y = sy + (q.ty - sy) * t;
-        ctx.globalAlpha = (0.25 + 0.75 * t) * (0.75 + 0.25 * Math.sin(now / 160 + q.tw));
+        const glow = clamp((p - 0.72) / 0.2);
+        ctx.globalAlpha = (0.35 + 0.65 * t) * (0.75 + 0.25 * Math.sin(now / 160 + q.tw));
         ctx.fillStyle = q.c;
         ctx.beginPath();
-        ctx.arc(x, y, q.s * u * (1.6 - 0.5 * t), 0, 7);
+        ctx.arc(x, y, q.s * u * (1.5 - 0.4 * t + glow * 0.6), 0, 7);
         ctx.fill();
       }
       ctx.globalAlpha = 1;
@@ -239,7 +240,7 @@ function Debu({ state, winner, audio }: DrawProps) {
 
 // ---------- 5. Sorot cahaya ----------
 function Sorot({ winner, p, audio }: DrawProps) {
-  const sweep = easeInOut(seg(p, 0.08, 0.78));
+  const sweep = easeInOut(seg(p, 0.06, 0.8));
   const full = easeOut(seg(p, 0.78, 0.96));
   useTickOn(p >= 0.8 ? 1 : 0, audio);
   useEffect(() => {
@@ -251,6 +252,7 @@ function Sorot({ winner, p, audio }: DrawProps) {
       <div className="beam" style={{ transform: `translateX(${-70 + sweep * 140}cqw) rotate(14deg)`, opacity: 1 - full * 0.8 }} />
       <div className="plate">
         <div className="engrave" style={{ fontSize: fs }}>{winner.number}</div>
+        <div className="engrave full gold-text" style={{ fontSize: fs, opacity: sweep * 0.35 * (1 - full) }}>{winner.number}</div>
         <div className="engrave lit" style={{ fontSize: fs, backgroundPosition: `${100 - sweep * 100}% 0` }}>{winner.number}</div>
         <div className="engrave full gold-text" style={{ fontSize: fs, opacity: full }}>{winner.number}</div>
       </div>
