@@ -124,6 +124,7 @@
 - Gaya undian tambahan (roda, sorot grid, bola 3D, kocokan arisan, kapsul gacha, dll.)
 - Mystery prize (pemenang diundi dulu, lalu memilih kotak hadiah)
 - Check-in peserta lewat QR, interaksi penonton lewat HP
+- HP sebagai remote operator (prioritas pertama setelah MVP, lihat bagian 8)
 - Akun, pembayaran, dashboard banyak event, white-label
 
 ## 5. Pertanyaan terbuka dan asumsi
@@ -178,6 +179,9 @@ Sebelum brainstorming, sempat dibuat prototipe satu file HTML. Kalau saya upload
 - **Gerak di semua adegan:** selain animasi masuk/keluar, adegan *hold* tetap punya gerak halus (foto hadiah melayang, cahaya mengalir, kilau sesekali) supaya tidak garing saat MC bicara. Saat nomor/nama pemenang tampil, gerak dibuat lebih kalem supaya tetap terbaca.
 - **Confetti + suara di Reveal** (lebih heboh untuk Grand Prize).
 - **Gaya undian jadi 5** (tetap tanpa wheel): **Buka digit** (bawaan, formal), **Slot reel** (meriah), **Amplop emas** (elegan, ala malam penghargaan, tanpa adegan kocok), **Debu emas** (partikel emas pelan berkumpul jadi nomor), **Sorot cahaya** (nomor seperti ukiran pelat logam, disapu cahaya). Tiap gaya berdiri sendiri, jadi bisa direvisi atau dihapus kalau tidak cocok. Sorot grid ditunda (kurang elegan, sulit dibaca untuk peserta >1.000).
+
+- **Versi mobile = HP sebagai remote operator** (23 Nov 2026). Laptop tetap menjalankan show di LED, operator memegang HP untuk NEXT / Hangus / Layar hitam dan melihat adegan berikutnya. **Dikerjakan setelah MVP.** Rencana teknis: aplikasi dibungkus jadi aplikasi desktop (Tauri/Electron) yang menjalankan server kecil di laptop; HP tersambung lewat hotspot laptop (tanpa internet) dengan scan QR. Selama MVP, remote = clicker presentasi. Persiapan sejak sekarang: UI setup & operator dibuat responsif, dan perintah operator sudah lewat satu jalur (`app/src/lib/channel.ts`) sehingga remote HP tinggal disambungkan ke jalur yang sama.
+- Setup dari HP, show dari HP, dan aplikasi di App Store/Play Store: belum direncanakan.
 
 ### Rencana MVP (ringkas)
 
