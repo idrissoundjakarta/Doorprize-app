@@ -3,7 +3,7 @@ name: Deploy prototipe ke GitHub Pages
 
 on:
   push:
-    branches: [claude/new-session-usti30]
+    branches: [main, claude/new-session-usti30]
   workflow_dispatch:
 
 permissions:
