@@ -94,7 +94,7 @@ export function Setup({ state, setState, onDone, toast }: Props) {
         </div>
       </main>
 
-      <aside className="side-preview">
+      <aside className={`side-preview s-${step}`}>
         <div className="card col" style={{ padding: 16 }}>
           <div className="row"><div className="lbl">Pratinjau langsung</div><span className="small muted right">data contoh</span></div>
           <div className="preview"><PreviewStage state={state} sessions={sessions} participants={participants} kind={preview} style={previewStyle ?? undefined} /></div>
@@ -242,7 +242,7 @@ function StepTampilan({ st, setTheme }: { st: Settings; setTheme: (p: Partial<Th
       </div>
 
       <div className="card col">
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        <div className="grid2">
           <label className="f">Font judul<select className="field" value={th.fontTitle} onChange={(e) => setTheme({ fontTitle: e.target.value })} style={{ fontFamily: th.fontTitle, fontSize: 18 }}>{FONTS.map((f) => <option key={f.id} value={f.id}>{f.label}</option>)}</select></label>
           <label className="f">Font nomor & nama<select className="field" value={th.fontBody} onChange={(e) => setTheme({ fontBody: e.target.value })} style={{ fontFamily: th.fontBody, fontSize: 16, fontWeight: 700 }}>{FONTS.filter((f) => f.kind === "sans").map((f) => <option key={f.id} value={f.id}>{f.label}</option>)}</select></label>
         </div>
@@ -322,7 +322,7 @@ function StepPeserta({ participants, setParticipants, toast }: { participants: P
             <div className="lbl">Pilih kolom</div>
             <span className="right"><Toggle on={header} onChange={setHeader} label="Baris pertama adalah judul kolom" /></span>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+          <div className="grid3">
             {(["number", "name", "info"] as const).map((k) => (
               <label key={k} className="f">{{ number: "Nomor (wajib)", name: "Nama", info: "Info tambahan" }[k]}
                 <select className="field" value={map[k]} onChange={(e) => setMap({ ...map, [k]: +e.target.value })} style={k === "number" ? { background: "var(--ink)", color: "#fff" } : undefined}>

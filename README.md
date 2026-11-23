@@ -2,8 +2,8 @@
 
 Aplikasi undian doorprize untuk event corporate (gathering, gala dinner, family day). Undian tampil sebagai *show* di LED/proyektor. Operator menyiapkan acara, peserta, sesi dan hadiah, lalu menjalankan undian cukup dengan tombol **NEXT** (keyboard atau clicker presentasi). Tempo acara tetap dipegang MC.
 
-- **Coba prototipe:** https://idrissoundjakarta.github.io/Doorprize-app/ (pakai Chrome/Edge di laptop)
-- **Status:** MVP dalam pengerjaan. Engine, flow show, visual & animasi, setup, dan operator sudah jalan. Belum: offline penuh (PWA), mode HP.
+- **Coba prototipe:** https://idrissoundjakarta.github.io/Doorprize-app/ (Chrome/Edge di laptop, atau Chrome/Safari di HP)
+- **Status:** MVP dalam pengerjaan. Engine, flow show, visual & animasi, setup, operator, dan Mode HP sudah jalan. Belum: offline penuh (PWA).
 
 ## Cara mencoba (5 menit)
 
@@ -12,6 +12,8 @@ Aplikasi undian doorprize untuk event corporate (gathering, gala dinner, family 
 3. Tekan **PageDown / Spasi** untuk lanjut. Di layar pemenang, tombol **Hangus** mengundi ulang.
 4. Tab **Setup**: ganti logo, ambil warna dari KV, pilih font, upload Excel peserta, foto hadiah, dan 5 gaya undian.
 5. Tekan **Mulai ulang show** kalau ingin mengulang dari awal.
+
+**Dari HP:** buka link yang sama, isi Setup, lalu tekan **Tampilkan show di HP ini**. Putar HP mendatar. Tap layar = lanjut, tahan = menu operator (hangus, layar hitam, keluar). Sambungkan HP ke LED lewat kabel USB-C→HDMI atau screen mirroring. Di iPhone, pakai *Bagikan → Tambahkan ke Layar Utama* supaya tampil layar penuh.
 
 Semua data tersimpan di browser masing-masing. Tidak ada server dan tidak ada akun.
 

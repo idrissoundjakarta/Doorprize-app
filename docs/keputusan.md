@@ -181,7 +181,8 @@ Sebelum brainstorming, sempat dibuat prototipe satu file HTML. Kalau saya upload
 - **Gaya undian jadi 5** (tetap tanpa wheel): **Buka digit** (bawaan, formal), **Slot reel** (meriah), **Amplop emas** (elegan, ala malam penghargaan, tanpa adegan kocok), **Debu emas** (partikel emas pelan berkumpul jadi nomor), **Sorot cahaya** (nomor seperti ukiran pelat logam, disapu cahaya). Tiap gaya berdiri sendiri, jadi bisa direvisi atau dihapus kalau tidak cocok. Sorot grid ditunda (kurang elegan, sulit dibaca untuk peserta >1.000).
 
 - **Versi mobile = HP sebagai remote operator** (23 Nov 2026). Laptop tetap menjalankan show di LED, operator memegang HP untuk NEXT / Hangus / Layar hitam dan melihat adegan berikutnya. **Dikerjakan setelah MVP.** Rencana teknis: aplikasi dibungkus jadi aplikasi desktop (Tauri/Electron) yang menjalankan server kecil di laptop; HP tersambung lewat hotspot laptop (tanpa internet) dengan scan QR. Selama MVP, remote = clicker presentasi. Persiapan sejak sekarang: UI setup & operator dibuat responsif, dan perintah operator sudah lewat satu jalur (`app/src/lib/channel.ts`) sehingga remote HP tinggal disambungkan ke jalur yang sama.
-- Setup dari HP, show dari HP, dan aplikasi di App Store/Play Store: belum direncanakan.
+- **Mode HP masuk MVP** (23 Nov 2026, menggantikan "setup/show dari HP belum direncanakan"): seluruh doorprize bisa dibuat dan dijalankan dari HP, dari setup sampai export. Aplikasi responsif; show di HP memakai mode satu layar dengan kontrol sentuh (tap = lanjut, tahan = menu), layar dijaga tetap menyala, background otomatis hemat di HP. HP disambung ke LED lewat kabel USB-C→HDMI (paling stabil) atau screen mirroring. Rekomendasi pemakaian: acara kecil–menengah; gala besar tetap laptop + clicker. Remote HP untuk laptop tetap setelah MVP.
+- Aplikasi di App Store/Play Store: belum direncanakan.
 
 ### Rencana MVP (ringkas)
 

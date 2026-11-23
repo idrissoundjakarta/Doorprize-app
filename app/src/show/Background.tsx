@@ -107,12 +107,14 @@ export function Background({ theme, intensity }: { theme: Theme; intensity: numb
     const U = { res: u("uRes"), time: u("uTime"), int: u("uInt"), dim: u("uDim"), light: u("uLight"), tpl: u("uTpl"), bg1: u("uBg1"), bg2: u("uBg2"), p: u("uP"), p2: u("uP2") };
     const vec = (hex: string) => hexToRgb(hex).map((v) => v / 255) as [number, number, number];
 
+    // HP/tablet: otomatis hemat (resolusi & fps lebih rendah) supaya tidak panas & boros baterai.
+    const mobile = window.matchMedia("(pointer: coarse)").matches && Math.min(screen.width, screen.height) < 900;
     let raf = 0, cur = live.current.intensity, last = 0;
     const t0 = performance.now();
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
       const { theme: th, intensity: target } = live.current;
-      const hemat = th.quality === "hemat";
+      const hemat = th.quality === "hemat" || mobile;
       if (hemat && now - last < 33) return; // ±30 fps
       last = now;
       const scale = (hemat ? 0.5 : Math.min(window.devicePixelRatio, 1.5)) * 1;

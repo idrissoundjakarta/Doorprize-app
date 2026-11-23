@@ -91,7 +91,7 @@
 
 /* Reveal */
 .hit { animation: hit .8s cubic-bezier(.2,1.4,.3,1) both; }
-@keyframes hit { 0% { opacity: 0; transform: scale(1.7); filter: blur(1.6cqmin); } 60% { opacity: 1; filter: none; } 100% { transform: none; } }
+@keyframes hit { 0% { opacity: .35; transform: scale(1.5); filter: blur(1.2cqmin); } 60% { opacity: 1; filter: none; } 100% { transform: none; } }
 .glow { filter: drop-shadow(0 0 4cqmin color-mix(in srgb, var(--p) 45%, transparent)); }
 .reveal .big-number { margin: 1cqmin 0 .4cqmin; }
 

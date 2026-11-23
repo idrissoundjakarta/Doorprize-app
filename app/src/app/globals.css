@@ -159,7 +159,24 @@ table.t { width: 100%; border-collapse: collapse; font-size: 14px; }
 .icon-btn:hover:not(:disabled) { background: var(--w); color: var(--ink); }
 .icon-btn.dng:hover { color: var(--dng-t); background: var(--dng-bg); }
 
-/* Responsif (laptop kecil, tablet, nanti HP) */
+/* Mode satu layar / HP: kontrol sentuh */
+.solo-touch { position: absolute; inset: 0; touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.solo-hint { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); background: rgba(0,0,0,.6); color: #fff; padding: 10px 18px; border-radius: 99px; font-size: 14px; pointer-events: none; white-space: nowrap; animation: fadeIn .4s; z-index: 5; }
+.rotate-hint { display: none; }
+@media (orientation: portrait) and (pointer: coarse) {
+  .rotate-hint { display: block; position: absolute; left: 12px; right: 12px; top: 12px; background: rgba(0,0,0,.6); color: #fff; padding: 10px 14px; border-radius: 14px; font-size: 13px; text-align: center; pointer-events: none; z-index: 5; }
+}
+.solo-panel { max-height: calc(100dvh - 32px); overflow: auto; }
+.only-m { display: none !important; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+/* HP berdiri: tombol NEXT menempel di bawah supaya selalu terjangkau jempol */
+@media (max-width: 760px) and (orientation: portrait) {
+  .op-controls { position: sticky; bottom: 0; z-index: 5; background: var(--g); padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); }
+}
+
+/* Responsif (laptop kecil, tablet, HP) */
 @media (max-width: 1400px) {
   .setup { grid-template-columns: 220px minmax(0, 1fr); }
   .side-preview { grid-column: 1 / -1; position: static; }
@@ -171,7 +188,24 @@ table.t { width: 100%; border-collapse: collapse; font-size: 14px; }
   .prize-row { grid-template-columns: 56px 1fr 96px; }
   .prize-row select, .prize-row .acts { grid-column: 2 / -1; }
 }
-@media (max-width: 760px) {
+@media (max-width: 760px), (pointer: coarse) and (max-width: 1000px) {
+  .hide-m { display: none !important; }
+  .only-m { display: flex !important; }
+  .field, select.field { font-size: 16px; } /* cegah zoom otomatis di iPhone */
+  .grid2, .grid3 { grid-template-columns: 1fr; }
+  .h1 { font-size: 24px; }
+  .card { padding: 18px; border-radius: 20px; }
+  .btn { min-height: 44px; }
+  .icon-btn { width: 40px; height: 40px; }
+  .seg { max-width: 100%; overflow-x: auto; }
+  .seg button { white-space: nowrap; }
+  .side-preview { order: -1; }
+  .op-main > .col:first-child { gap: 12px; }
+  .op-controls .kbd, .steps > .lbl { display: none; }
+  .side-preview.s-acara, .side-preview.s-peserta, .side-preview.s-sesi { display: none; }
+  .winners { max-height: none; }
+  .solo-panel { left: 8px; right: 8px; bottom: 8px; width: auto; }
+  .toast { left: 14px; right: 14px; bottom: 14px; }
   .setup { grid-template-columns: 1fr; padding: 0 14px 20px; }
   .steps { position: static; flex-direction: row; overflow-x: auto; }
   .step small { display: none; }

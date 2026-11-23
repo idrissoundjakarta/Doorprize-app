@@ -9,6 +9,7 @@ import { useShowController } from "@/lib/useShowController";
 import { ShowView } from "@/show/ShowView";
 import { unlockAudio } from "@/show/sound";
 import { Setup } from "./Setup";
+import { SoloShow } from "./SoloShow";
 import { Dialog, Logo, useToast } from "./ui";
 
 /** Teks tombol NEXT sesuai adegan, supaya operator tahu persis apa yang terjadi kalau ditekan. */
@@ -108,26 +109,47 @@ export function Operator() {
     </>
   );
 
-  // ---------- Mode satu layar (cadangan) ----------
+  // ---------- Mode satu layar / Mode HP ----------
+  const exitSolo = () => {
+    setSolo(false);
+    setPanel(false);
+    if (document.fullscreenElement) void document.exitFullscreen();
+  };
   if (solo) {
     return (
-      <main className="solo">
-        <ShowView state={state} audio />
-        {panel && (
-          <div className="solo-panel">
-            {status}
-            {hangusArmed && <span className="chip c-dng">✕ Tekan H sekali lagi untuk hangus</span>}
-            {controls}
-            <div className="row">
-              <button className={`btn b-sm ${state.blank ? "b-pri" : "b-sec"}`} onClick={() => command("blank")}>Layar hitam <span className="kbd">B</span></button>
-              <button className="btn b-sm b-ghost right" onClick={() => { setSolo(false); setPanel(false); if (document.fullscreenElement) void document.exitFullscreen(); }}>Keluar mode satu layar</button>
-            </div>
-          </div>
-        )}
+      <SoloShow
+        state={state}
+        onNext={() => command("next")}
+        setPanel={setPanel}
+        panel={
+          panel ? (
+            <>
+              {status}
+              {hangusArmed && <span className="chip c-dng">✕ Tekan H sekali lagi untuk hangus</span>}
+              {controls}
+              <div className="row wrap">
+                <button className={`btn b-sm ${state.blank ? "b-pri" : "b-sec"}`} onClick={() => command("blank")}>{state.blank ? "Tampilkan lagi" : "Layar hitam"} <span className="kbd hide-m">B</span></button>
+                <button className="btn b-sm b-ghost" onClick={() => setPanel(false)}>Tutup menu</button>
+                <button className="btn b-sm b-ghost right" onClick={exitSolo}>Keluar dari show</button>
+              </div>
+            </>
+          ) : null
+        }
+      >
         {dialogs}
-      </main>
+      </SoloShow>
     );
   }
+
+  const startSolo = () => {
+    setSolo(true);
+    setPanel(false);
+    unlockAudio();
+    toggleFullscreen();
+    // Di HP: kunci layar mendatar (Android Chrome, hanya saat fullscreen).
+    const o = screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> };
+    setTimeout(() => void o.lock?.("landscape").catch(() => {}), 300);
+  };
 
   // ---------- Mode dua layar (utama) ----------
   const openShowWindow = async () => {
@@ -162,13 +184,13 @@ export function Operator() {
           <button className={tab === "show" ? "on" : ""} onClick={() => setTab("show")}>Show</button>
         </div>
         <div className="grow" />
-        {showConnected ? <span className="chip c-go"><span className="dot" style={{ background: "var(--go-t)" }} />Layar LED terhubung</span> : <span className="chip c-neu">○ Layar LED belum dibuka</span>}
-        {saveFailed ? <span className="chip c-dng">✕ Gagal menyimpan</span> : <span className="chip c-info">i Tersimpan otomatis</span>}
+        <span className="hide-m">{showConnected ? <span className="chip c-go"><span className="dot" style={{ background: "var(--go-t)" }} />Layar LED terhubung</span> : <span className="chip c-neu">○ Layar LED belum dibuka</span>}</span>
+        {saveFailed ? <span className="chip c-dng">✕ Gagal menyimpan</span> : <span className="chip c-info hide-m">i Tersimpan otomatis</span>}
         {tab === "show" && (
           <>
-            <button className={`btn b-sm ${state.blank ? "b-pri" : "b-sec"}`} onClick={() => command("blank")}>Layar hitam <span className="kbd">B</span></button>
-            <button className="btn b-sm b-sec" onClick={openShowWindow}>Buka jendela show</button>
-            <button className="btn b-sm b-ghost" onClick={() => { setSolo(true); setPanel(false); toggleFullscreen(); }}>Mode satu layar</button>
+            <button className={`btn b-sm hide-m ${state.blank ? "b-pri" : "b-sec"}`} onClick={() => command("blank")}>Layar hitam <span className="kbd">B</span></button>
+            <button className="btn b-sm b-sec hide-m" onClick={openShowWindow}>Buka jendela show</button>
+            <button className="btn b-sm b-ghost hide-m" onClick={startSolo}>Mode satu layar</button>
           </>
         )}
       </header>
@@ -178,13 +200,17 @@ export function Operator() {
       ) : (
         <div className="op-main">
           <div className="col">
+            <button className="btn b-pri only-m btn-next" onClick={startSolo}>
+              <span>Tampilkan show di HP ini<small>Layar penuh · tap = lanjut · tahan = menu</small></span>
+              <span className="go-ico">▶</span>
+            </button>
             <div className="card col" style={{ padding: 18 }}>
               {status}
               <div className="preview"><ShowView state={state} /></div>
             </div>
             {hangusArmed && <span className="chip c-dng" style={{ alignSelf: "start" }}>✕ Tekan H sekali lagi (3 detik) untuk menghanguskan</span>}
             {controls}
-            <div className="small muted">Clicker: <b>PageDown/→/Spasi</b> = lanjut · <b>PageUp/←</b> = kembali · <b>B</b> = layar hitam · <b>H×2</b> = hangus · <b>F</b> = fullscreen di jendela show</div>
+            <div className="small muted hide-m">Clicker: <b>PageDown/→/Spasi</b> = lanjut · <b>PageUp/←</b> = kembali · <b>B</b> = layar hitam · <b>H×2</b> = hangus · <b>F</b> = fullscreen di jendela show</div>
           </div>
 
           <div className="col">
