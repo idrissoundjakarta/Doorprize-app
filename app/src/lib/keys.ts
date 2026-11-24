@@ -10,6 +10,8 @@ export function keyToCommand(e: KeyboardEvent): KeyCommand | null {
   const el = e.target as HTMLElement | null;
   if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable)) return null;
   if (e.ctrlKey || e.metaKey || e.altKey) return null;
+  // Tombol yang ditahan mengirim keydown berulang: abaikan, supaya tidak melompati adegan/digit.
+  if (e.repeat) return null;
   switch (e.key) {
     case "PageDown":
     case "ArrowRight":

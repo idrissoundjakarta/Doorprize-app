@@ -68,7 +68,64 @@ export function DrawStyleView({ style, ...props }: DrawProps & { style: DrawStyl
 }
 
 // ---------- 1. Buka digit ----------
-function Digits({ winner, p, audio, duration }: DrawProps) {
+function Digits(props: DrawProps) {
+  const sc = props.state.scene;
+  return sc.kind === "draw" && sc.manual ? <ManualDigits {...props} revealed={sc.revealed ?? 0} /> : <AutoDigits {...props} />;
+}
+
+/** Detik berjalan terus (untuk putaran digit yang menunggu aba-aba tanpa batas waktu). */
+function useClock(start: number): number {
+  const [t, setT] = useState(0);
+  useEffect(() => {
+    let raf = 0;
+    const tick = () => {
+      setT((Date.now() - start) / 1000);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [start]);
+  return t;
+}
+
+/**
+ * Buka digit Manual: digit yang sudah dibuka tetap terlihat, digit berikutnya berputar
+ * menunggu aba-aba MC, sisanya tertutup (•) supaya tidak bocor sebelum waktunya.
+ */
+function ManualDigits({ winner, audio, state, revealed }: DrawProps & { revealed: number }) {
+  const t = useClock(state.sceneAt);
+  useTickOn(revealed, audio, [...winner.number].filter((c) => c !== " ").length);
+  let k = -1;
+  return (
+    <div className="digits" style={{ fontSize: fit(winner.number, 22, 70) }}>
+      {[...winner.number].map((c, i) => {
+        if (c === " ") return <div key={i} className="dgap" />;
+        k++;
+        const open = k < revealed;
+        const spinning = k === revealed;
+        const pos = t * 14 + i * 3.7;
+        const pool = /\d/.test(c) ? 10 : 26;
+        const sym = (n: number) => (pool === 10 ? String(hash(n, i) % 10) : String.fromCharCode(65 + (hash(n, i) % 26)));
+        return (
+          <div key={i} className={`dbox ${open ? "locked" : spinning ? "suspense" : "closed"}`}>
+            {open ? (
+              <span className="gold-text">{c}</span>
+            ) : spinning ? (
+              <div className="dstrip" style={{ transform: `translateY(${-(pos % 1) * 100}%)`, filter: "blur(0.02em)" }}>
+                <span>{sym(Math.floor(pos))}</span>
+                <span>{sym(Math.floor(pos) + 1)}</span>
+              </div>
+            ) : (
+              <span className="dot-ph">•</span>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function AutoDigits({ winner, p, audio, duration }: DrawProps) {
   const chars = [...winner.number];
   const n = chars.length;
   const lockAt = (i: number) => (i === n - 1 ? 0.9 : 0.22 + (0.4 * i) / Math.max(1, n - 1));
