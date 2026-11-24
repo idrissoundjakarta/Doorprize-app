@@ -184,6 +184,8 @@ Sebelum brainstorming, sempat dibuat prototipe satu file HTML. Kalau saya upload
 - **Mode HP masuk MVP** (23 Nov 2026, menggantikan "setup/show dari HP belum direncanakan"): seluruh doorprize bisa dibuat dan dijalankan dari HP, dari setup sampai export. Aplikasi responsif; show di HP memakai mode satu layar dengan kontrol sentuh (tap = lanjut, tahan = menu), layar dijaga tetap menyala, background otomatis hemat di HP. HP disambung ke LED lewat kabel USB-C→HDMI (paling stabil) atau screen mirroring. Rekomendasi pemakaian: acara kecil–menengah; gala besar tetap laptop + clicker. Remote HP untuk laptop tetap setelah MVP.
 - Aplikasi di App Store/Play Store: belum direncanakan.
 
+- **Memindahkan data HP → laptop: ditunda** (24 Nov 2026). Usulan yang sudah dibahas: (A) file "paket acara" yang dikirim lewat WhatsApp/Drive, lalu dibuka di laptop, tanpa server; (B) kode acara 6 digit, perlu server; (C) akun + sinkron otomatis, digabung dengan fitur akun. Rekomendasi saat dikerjakan nanti: A dulu, C setelah MVP. B/C menyimpan data pribadi peserta di server, jadi kepatuhan UU PDP perlu dicek dulu. Fokus sekarang: engine & UX.
+
 ### Rencana MVP (ringkas)
 
 1. Setup: sesi & hadiah (nama, jumlah, foto, urutan), peserta (generate rentang / paste / upload xlsx-csv, pilih kolom, bersihkan data), brand (logo, judul acara), tampilan (template generatif, warna, font, opsi ambil palet dari KV), gaya & tempo undian.
