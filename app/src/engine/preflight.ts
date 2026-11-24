@@ -1,6 +1,6 @@
 import type { ShowState } from "./types";
 
-export type Check = { level: "error" | "warn" | "info"; text: string; step?: "acara" | "tampilan" | "peserta" | "sesi" | "gaya" };
+export type Check = { level: "error" | "warn" | "info"; text: string; step?: "acara" | "tampilan" | "layar" | "peserta" | "sesi" | "gaya" };
 
 /**
  * Cek sebelum show. "error" = show tidak bisa berjalan dengan benar,
@@ -24,6 +24,10 @@ export function preflight(state: Pick<ShowState, "settings" | "sessions" | "part
   if (noPhoto.length) out.push({ level: "warn", text: `${noPhoto.length} dari ${prizes.length} hadiah belum ada fotonya (tampil ikon hadiah)`, step: "sesi" });
   if (!state.settings.eventTitle.trim()) out.push({ level: "warn", text: "Judul acara masih kosong", step: "acara" });
   if (n > 0 && totalQty > n * 0.9 && totalQty <= n) out.push({ level: "warn", text: `Hampir semua peserta akan menang (${totalQty} hadiah untuk ${n} peserta). Sisa cadangan untuk hangus sedikit`, step: "sesi" });
+
+  const led = state.settings.led;
+  if (led?.frameId && (led.frameW !== led.width || led.frameH !== led.height))
+    out.push({ level: "warn", text: `Frame custom ${led.frameW}×${led.frameH} tidak cocok dengan layar LED ${led.width}×${led.height}. Sementara memakai frame bawaan`, step: "layar" });
 
   if (!state.settings.logo) out.push({ level: "info", text: "Logo klien belum diupload (tampil inisial perusahaan)", step: "acara" });
   if (n > 0 && !state.participants.some((p) => p.name)) out.push({ level: "info", text: "Peserta tanpa nama: hanya nomor yang tampil saat pemenang diumumkan", step: "peserta" });

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { ShowState } from "@/engine/types";
-import { ShowView } from "@/show/ShowView";
+import { LedStage } from "@/show/LedStage";
 import { unlockAudio } from "@/show/sound";
 
 const LONG_PRESS_MS = 550;
@@ -76,7 +76,7 @@ export function SoloShow({ state, onNext, panel, setPanel, children }: { state: 
   return (
     <main className="solo" onContextMenu={(e) => e.preventDefault()}>
       <div className="solo-touch" onPointerDown={down} onPointerUp={up} onPointerMove={move} onPointerCancel={() => { if (press.current) clearTimeout(press.current.t); press.current = null; }}>
-        <ShowView state={state} audio />
+        <LedStage state={state} audio />
       </div>
       {hint && !panel && (
         <div className="solo-hint">

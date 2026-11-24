@@ -18,6 +18,8 @@ export function useShowController() {
   const [state, setState] = useState<ShowState | null>(null);
   const [hangusArmed, setHangusArmed] = useState(false);
   const [showAliveAt, setShowAliveAt] = useState(0);
+  /** Ukuran layar jendela LED yang terhubung (piksel), untuk cek rasio terhadap setup. */
+  const [showSize, setShowSize] = useState<{ w: number; h: number } | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
   /** Waktu terakhir operator mencoba mulai padahal data belum lengkap. */
   const [blockedAt, setBlockedAt] = useState(0);
@@ -109,6 +111,7 @@ export function useShowController() {
     const ch = openChannel((m: Message) => {
       if (m.t === "hello" && stateRef.current) ch.send({ t: "state", state: stateRef.current, hangusArmed: false });
       if (m.t === "alive" || m.t === "hello") setShowAliveAt(Date.now());
+      if (m.t === "alive" && m.w && m.h) setShowSize((cur) => (cur && cur.w === m.w && cur.h === m.h ? cur : { w: m.w!, h: m.h! }));
       if (m.t === "cmd") commandRef.current(m.cmd);
     });
     channel.current = ch;
@@ -139,5 +142,5 @@ export function useShowController() {
     setWelcome(false);
   }, []);
 
-  return { state, setState, dispatch, command, hangusNow, hangusArmed, showConnected, saveFailed, welcome, start, blockedAt };
+  return { state, setState, dispatch, command, hangusNow, hangusArmed, showConnected, saveFailed, welcome, start, blockedAt, showSize };
 }
