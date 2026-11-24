@@ -11,16 +11,23 @@ import { fileToDataUrl } from "@/lib/image";
 import { parseRows, readSpreadsheet } from "@/lib/import";
 import { FONTS, STYLE_INFO, TEMPLATE_PRESET } from "@/show/presets";
 import { ShowView } from "@/show/ShowView";
+import { LedStage } from "@/show/LedStage";
+import { LED_PRESETS, describeLed, ledOf, makeTemplate, showRect } from "@/lib/led";
+import { downloadBlob } from "@/lib/export";
+import { deleteAsset, saveAsset } from "@/lib/storage";
+import { loadImage } from "@/lib/image";
+import { uid as newId } from "@/engine/rng";
 import { PreflightList } from "./Preflight";
 import { Dialog, Toggle } from "./ui";
 
 type Props = { state: ShowState; setState: (s: ShowState) => void; onDone: () => void; toast: (m: string) => void };
-type Step = "acara" | "tampilan" | "peserta" | "sesi" | "gaya";
+type Step = "acara" | "tampilan" | "layar" | "peserta" | "sesi" | "gaya";
 type PreviewKind = "looping" | "showcase" | "draw" | "reveal";
 
 const STEPS: { id: Step; label: string }[] = [
   { id: "acara", label: "Acara" },
   { id: "tampilan", label: "Tampilan" },
+  { id: "layar", label: "Layar LED" },
   { id: "peserta", label: "Peserta" },
   { id: "sesi", label: "Sesi & hadiah" },
   { id: "gaya", label: "Gaya undian" },
@@ -63,6 +70,7 @@ export function Setup({ state, setState, onDone, toast }: Props) {
   const summary: Record<Step, string> = {
     acara: st.eventTitle || "Belum diisi",
     tampilan: `${TEMPLATE_PRESET[st.theme.template].label}`,
+    layar: `${ledOf(st).width}×${ledOf(st).height}${ledOf(st).frameId ? " · frame custom" : ""}`,
     peserta: `${participants.length} peserta`,
     sesi: `${sessions.length} sesi · ${sessions.reduce((n, s) => n + s.prizes.length, 0)} hadiah`,
     gaya: `${STYLE_INFO[st.style].label} · ${st.tempo}`,
@@ -70,6 +78,7 @@ export function Setup({ state, setState, onDone, toast }: Props) {
   const done: Record<Step, boolean> = {
     acara: !!st.eventTitle,
     tampilan: true,
+    layar: true,
     peserta: participants.length > 0,
     sesi: sessions.some((s) => s.prizes.length > 0),
     gaya: true,
@@ -109,6 +118,7 @@ export function Setup({ state, setState, onDone, toast }: Props) {
       <main className="col">
         {step === "acara" && <StepAcara st={st} setSettings={setSettings} />}
         {step === "tampilan" && <StepTampilan st={st} setTheme={setTheme} />}
+        {step === "layar" && <StepLayar state={state} setSettings={setSettings} toast={toast} />}
         {step === "peserta" && <StepPeserta participants={participants} setParticipants={setParticipants} toast={toast} />}
         {step === "sesi" && <StepSesi sessions={sessions} setSessions={setSessions} />}
         {step === "gaya" && <StepGaya st={st} setSettings={setSettings} onPreview={(s) => { setPreviewStyle(s); setPreview("draw"); }} />}
@@ -118,7 +128,7 @@ export function Setup({ state, setState, onDone, toast }: Props) {
         </div>
       </main>
 
-      <aside className={`side-preview s-${step}`}>
+      <aside className={`side-preview s-${step}`} style={step === "layar" ? { display: "none" } : undefined}>
         <div className="card col" style={{ padding: 16 }}>
           <div className="row"><div className="lbl">Pratinjau langsung</div><span className="small muted right">data contoh</span></div>
           <div className="preview"><PreviewStage state={state} sessions={sessions} participants={participants} kind={preview} style={previewStyle ?? undefined} /></div>
@@ -282,6 +292,107 @@ function StepTampilan({ st, setTheme }: { st: Settings; setTheme: (p: Partial<Th
   );
 }
 
+// ================= Langkah: Layar LED =================
+function StepLayar({ state, setSettings, toast }: { state: ShowState; setSettings: (p: Partial<Settings>) => void; toast: (m: string, tone?: "go" | "warn") => void }) {
+  const led = ledOf(state.settings);
+  const [w, setW] = useState(String(led.width));
+  const [h, setH] = useState(String(led.height));
+  const [err, setErr] = useState("");
+  const r = showRect(led.width, led.height);
+  const full = r.w === led.width && r.h === led.height;
+  const hasFrame = !!led.frameId;
+  const frameOk = hasFrame && led.frameW === led.width && led.frameH === led.height;
+
+  const setRes = (W: number, H: number) => {
+    if (!(W >= 320 && H >= 240 && W <= 16384 && H <= 16384)) {
+      setErr("Isi lebar dan tinggi dalam piksel (minimal 320×240).");
+      return;
+    }
+    setErr("");
+    setW(String(W));
+    setH(String(H));
+    setSettings({ led: { ...led, width: W, height: H } });
+  };
+  const onFrame = async (e: ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (!f) return;
+    const url = URL.createObjectURL(f);
+    try {
+      const img = await loadImage(url);
+      if (img.naturalWidth !== led.width || img.naturalHeight !== led.height) {
+        setErr(`Ukuran gambar ${img.naturalWidth}×${img.naturalHeight} px, padahal layar LED ${led.width}×${led.height} px. Simpan ulang desain dengan ukuran persis ${led.width}×${led.height} px. Sementara tetap memakai frame bawaan.`);
+        return;
+      }
+      const id = newId();
+      if (!(await saveAsset(id, f))) {
+        setErr("Gagal menyimpan gambar (penyimpanan penuh?).");
+        return;
+      }
+      if (led.frameId) void deleteAsset(led.frameId);
+      setErr("");
+      setSettings({ led: { ...led, frameId: id, frameW: img.naturalWidth, frameH: img.naturalHeight } });
+      toast("Frame custom terpasang");
+    } catch {
+      setErr("File ini bukan gambar yang bisa dibaca. Pakai PNG atau JPG.");
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  };
+  const useDefault = () => {
+    if (led.frameId) void deleteAsset(led.frameId);
+    setSettings({ led: { width: led.width, height: led.height } });
+    setErr("");
+    toast("Kembali ke frame bawaan");
+  };
+
+  return (
+    <>
+      <Head n={3} title="Layar LED" desc="Masukkan resolusi layar dari tim LED. Area show tetap 16:9 dan utuh di tengah; ruang yang tersisa diisi frame." />
+      <div className="card col">
+        <div className="lbl">Resolusi layar LED</div>
+        <div className="row wrap" style={{ gap: 8 }}>
+          {LED_PRESETS.map((p) => (
+            <button key={p.label} className={`btn b-sm ${led.width === p.w && led.height === p.h ? "b-pri" : "b-sec"}`} onClick={() => setRes(p.w, p.h)}>{p.label}</button>
+          ))}
+        </div>
+        <div className="row wrap" style={{ alignItems: "end", gap: 10 }}>
+          <label className="f" style={{ width: 130 }}>Lebar (px)<input className="field" inputMode="numeric" value={w} onChange={(e) => setW(e.target.value.replace(/\D/g, ""))} /></label>
+          <span style={{ paddingBottom: 12 }}>×</span>
+          <label className="f" style={{ width: 130 }}>Tinggi (px)<input className="field" inputMode="numeric" value={h} onChange={(e) => setH(e.target.value.replace(/\D/g, ""))} /></label>
+          <button className="btn b-sec" onClick={() => setRes(+w, +h)}>Terapkan</button>
+        </div>
+        <span className={`chip ${full ? "c-go" : "c-info"}`} style={{ alignSelf: "start", whiteSpace: "normal" }}>{full ? "✓" : "i"} {describeLed(led.width, led.height)}</span>
+      </div>
+
+      <div className="card col">
+        <div className="row"><div className="lbl">Pratinjau layar LED</div><span className="small muted right">garis merah = batas area show</span></div>
+        <div className="preview" style={{ aspectRatio: `${led.width} / ${led.height}`, margin: "0 auto", width: `min(100%, ${Math.round((420 * led.width) / led.height)}px)` }}><LedStage state={state} guides /></div>
+      </div>
+
+      <div className="card col">
+        <div className="row wrap">
+          <div className="lbl">Frame</div>
+          <span className="right">
+            {full ? <span className="chip c-neu">Tidak perlu frame (16:9 penuh)</span> : frameOk ? <span className="chip c-go">✓ Frame custom {led.frameW}×{led.frameH}</span> : hasFrame ? <span className="chip c-warn">! Frame custom {led.frameW}×{led.frameH} tidak cocok, sementara frame bawaan</span> : <span className="chip c-go">✓ Frame bawaan (ikut palet acara)</span>}
+          </span>
+        </div>
+        {!full && (
+          <>
+            <div className="small muted" style={{ lineHeight: 1.6 }}>Frame bawaan langsung siap pakai dan warnanya mengikuti palet acara. Kalau punya desainer: unduh template, desain di area biru (bagian tengah yang abu-abu akan tertutup show), simpan dengan ukuran persis {led.width}×{led.height} px, lalu upload.</div>
+            <div className="row wrap" style={{ gap: 10 }}>
+              <button className="btn b-sec" onClick={async () => downloadBlob(`template-frame-led-${led.width}x${led.height}.png`, await makeTemplate(led.width, led.height))}>Unduh template {led.width}×{led.height}</button>
+              <label className="btn b-pri" style={{ cursor: "pointer" }}>Upload frame custom<input type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={onFrame} /></label>
+              {hasFrame && <button className="btn b-ghost" onClick={useDefault}>Kembali ke frame bawaan</button>}
+            </div>
+          </>
+        )}
+        {err && <div className="chip c-warn" style={{ whiteSpace: "normal", alignSelf: "start", lineHeight: 1.5 }}>! {err}</div>}
+      </div>
+    </>
+  );
+}
+
 // ================= Langkah 3: Peserta =================
 function StepPeserta({ participants, setParticipants, toast }: { participants: Participant[]; setParticipants: (p: Participant[]) => void; toast: (m: string) => void }) {
   const [mode, setMode] = useState<"range" | "paste" | "file">("range");
@@ -315,7 +426,7 @@ function StepPeserta({ participants, setParticipants, toast }: { participants: P
 
   return (
     <>
-      <Head n={3} title="Peserta" desc="Nomor kupon tampil besar. Kalau ada nama, nama tampil di bawahnya saat pemenang diumumkan." right={<span className="chip c-champ">★ {participants.length} peserta</span>} />
+      <Head n={4} title="Peserta" desc="Nomor kupon tampil besar. Kalau ada nama, nama tampil di bawahnya saat pemenang diumumkan." right={<span className="chip c-champ">★ {participants.length} peserta</span>} />
       <div className="seg" style={{ alignSelf: "start" }}>
         <button className={mode === "range" ? "on" : ""} onClick={() => setMode("range")}>Buat nomor kupon</button>
         <button className={mode === "paste" ? "on" : ""} onClick={() => setMode("paste")}>Paste dari Excel</button>
@@ -413,7 +524,7 @@ function StepSesi({ sessions, setSessions }: { sessions: Session[]; setSessions:
   };
   return (
     <>
-      <Head n={4} title="Sesi & hadiah" desc="Bagi hadiah ke beberapa sesi supaya penonton tetap penasaran sampai akhir. Urutan di sini = urutan di show." right={<button className="btn b-sm b-ghost" onClick={() => setSessions(sampleSessions())}>Pakai data contoh</button>} />
+      <Head n={5} title="Sesi & hadiah" desc="Bagi hadiah ke beberapa sesi supaya penonton tetap penasaran sampai akhir. Urutan di sini = urutan di show." right={<button className="btn b-sm b-ghost" onClick={() => setSessions(sampleSessions())}>Pakai data contoh</button>} />
       <input ref={fileRef} type="file" accept="image/*" hidden onChange={onPhoto} />
       {sessions.map((s, i) => (
         <div key={s.id} className="card col">
@@ -457,7 +568,7 @@ function StepSesi({ sessions, setSessions }: { sessions: Session[]; setSessions:
 function StepGaya({ st, setSettings, onPreview }: { st: Settings; setSettings: (p: Partial<Settings>) => void; onPreview: (s: DrawStyle) => void }) {
   return (
     <>
-      <Head n={5} title="Gaya undian" desc="Gaya bawaan untuk semua hadiah. Hadiah tertentu bisa memakai gaya lain di langkah Sesi & hadiah." />
+      <Head n={6} title="Gaya undian" desc="Gaya bawaan untuk semua hadiah. Hadiah tertentu bisa memakai gaya lain di langkah Sesi & hadiah." />
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
         {(Object.keys(STYLE_INFO) as DrawStyle[]).map((d) => (
           <button key={d} className={`stylecard ${st.style === d ? "on" : ""}`} onClick={() => { setSettings({ style: d }); onPreview(d); }}>

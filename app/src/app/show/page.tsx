@@ -5,7 +5,7 @@ import type { ShowState } from "@/engine/types";
 import { openChannel } from "@/lib/channel";
 import { keyToCommand, toggleFullscreen } from "@/lib/keys";
 import { loadShow } from "@/lib/storage";
-import { ShowView } from "@/show/ShowView";
+import { LedStage } from "@/show/LedStage";
 import { unlockAudio } from "@/show/sound";
 
 /**
@@ -23,7 +23,7 @@ export default function ShowPage() {
       if (m.t === "state") setState(m.state);
     });
     ch.send({ t: "hello" });
-    const alive = setInterval(() => ch.send({ t: "alive" }), 1000);
+    const alive = setInterval(() => ch.send({ t: "alive", w: Math.round(window.innerWidth * devicePixelRatio), h: Math.round(window.innerHeight * devicePixelRatio) }), 1000);
 
     const onKey = (e: KeyboardEvent) => {
       unlockAudio();
@@ -48,7 +48,7 @@ export default function ShowPage() {
 
   return (
     <main className="show-window" onDoubleClick={toggleFullscreen}>
-      {state ? <ShowView state={state} audio /> : <div className="waiting">Menunggu jendela operator…</div>}
+      {state ? <LedStage state={state} audio /> : <div className="waiting">Menunggu jendela operator…</div>}
       {!isFull && <div className="fs-hint">Klik sekali untuk mengaktifkan suara · tekan F atau klik dua kali untuk fullscreen</div>}
     </main>
   );

@@ -87,3 +87,43 @@ export async function requestPersistence(): Promise<boolean> {
     return false;
   }
 }
+
+// ---------- Aset besar (mis. frame LED) ----------
+// Disimpan terpisah dari data show supaya tidak ikut terkirim ke jendela LED setiap ada perubahan.
+
+export async function saveAsset(id: string, blob: Blob): Promise<boolean> {
+  try {
+    const db = await openDb();
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(STORE, "readwrite");
+      tx.objectStore(STORE).put(blob, `asset:${id}`);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function loadAsset(id: string): Promise<Blob | null> {
+  try {
+    const db = await openDb();
+    return await new Promise<Blob | null>((resolve, reject) => {
+      const req = db.transaction(STORE).objectStore(STORE).get(`asset:${id}`);
+      req.onsuccess = () => resolve((req.result as Blob | undefined) ?? null);
+      req.onerror = () => reject(req.error);
+    });
+  } catch {
+    return null;
+  }
+}
+
+export async function deleteAsset(id: string): Promise<void> {
+  try {
+    const db = await openDb();
+    db.transaction(STORE, "readwrite").objectStore(STORE).delete(`asset:${id}`);
+  } catch {
+    /* abaikan */
+  }
+}
