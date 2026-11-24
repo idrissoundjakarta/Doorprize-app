@@ -96,5 +96,10 @@ export function sampleSessions(): Session[] {
 }
 
 export function sampleShow(now = Date.now()): ShowState {
-  return createShow(sampleSessions(), sampleParticipants(), DEFAULT_SETTINGS, now);
+  return { ...createShow(sampleSessions(), sampleParticipants(), DEFAULT_SETTINGS, now), sample: true };
+}
+
+/** Acara baru yang masih kosong: satu sesi tanpa hadiah, tanpa peserta. */
+export function emptyShow(now = Date.now()): ShowState {
+  return createShow([{ id: uid(), name: "Sesi 1", prizes: [] }], [], { ...DEFAULT_SETTINGS, eventTitle: "", companyName: "" }, now);
 }

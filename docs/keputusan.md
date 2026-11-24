@@ -186,6 +186,14 @@ Sebelum brainstorming, sempat dibuat prototipe satu file HTML. Kalau saya upload
 
 - **Memindahkan data HP → laptop: ditunda** (24 Nov 2026). Usulan yang sudah dibahas: (A) file "paket acara" yang dikirim lewat WhatsApp/Drive, lalu dibuka di laptop, tanpa server; (B) kode acara 6 digit, perlu server; (C) akun + sinkron otomatis, digabung dengan fitur akun. Rekomendasi saat dikerjakan nanti: A dulu, C setelah MVP. B/C menyimpan data pribadi peserta di server, jadi kepatuhan UU PDP perlu dicek dulu. Fokus sekarang: engine & UX.
 
+- **UX awal & pengaman sebelum show** (24 Nov 2026):
+  - Halaman awal: **Buat acara baru** (mulai kosong, dipandu Setup) atau **Coba dengan data contoh** (ditandai "Data contoh" di jendela operator).
+  - **Cek sebelum show**: error (✕) memblokir mulai show (belum ada peserta/hadiah, hadiah > peserta); peringatan (!) tidak memblokir (sesi kosong, hadiah tanpa nama/foto, judul kosong, peserta hampir habis); info (i). Klik baris = langsung ke langkah Setup terkait.
+  - Perubahan peserta/sesi **tersimpan otomatis selama show belum dimulai**; konfirmasi hanya kalau show sudah berjalan.
+  - Tombol "Mulai acara baru" di Setup (dengan konfirmasi).
+  - Layar pemenang menyambung dari animasi undi (tanpa jeda kosong).
+  - Berikutnya: mode gladi yang jelas, daftar urutan show (cue list) di jendela operator.
+
 ### Rencana MVP (ringkas)
 
 1. Setup: sesi & hadiah (nama, jumlah, foto, urutan), peserta (generate rentang / paste / upload xlsx-csv, pilih kolom, bersihkan data), brand (logo, judul acara), tampilan (template generatif, warna, font, opsi ambil palet dari KV), gaya & tempo undian.

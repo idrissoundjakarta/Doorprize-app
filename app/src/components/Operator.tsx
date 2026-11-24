@@ -9,12 +9,16 @@ import { useShowController } from "@/lib/useShowController";
 import { ShowView } from "@/show/ShowView";
 import { unlockAudio } from "@/show/sound";
 import { Setup } from "./Setup";
+import { preflight, preflightOk } from "@/engine/preflight";
+import { PreflightList } from "./Preflight";
 import { SoloShow } from "./SoloShow";
+import { Welcome } from "./Welcome";
 import { Dialog, Logo, useToast } from "./ui";
 
 /** Teks tombol NEXT sesuai adegan, supaya operator tahu persis apa yang terjadi kalau ditekan. */
 function nextButton(state: ShowState): { label: string; sub: string; enabled: boolean } {
   const sc = state.scene;
+  if (state.draws.length === 0 && (sc.kind === "looping" || sc.kind === "end") && !preflightOk(preflight(state))) return { label: "Lengkapi data dulu", sub: "Lihat cek sebelum show", enabled: false };
   switch (sc.kind) {
     case "looping":
       return { label: "Mulai sesi", sub: `Opener ${state.sessions[sc.session]?.name ?? ""}`, enabled: true };
@@ -34,7 +38,7 @@ function nextButton(state: ShowState): { label: string; sub: string; enabled: bo
 }
 
 export function Operator() {
-  const { state, setState, dispatch, command, hangusNow, hangusArmed, showConnected, saveFailed } = useShowController();
+  const { state, setState, dispatch, command, hangusNow, hangusArmed, showConnected, saveFailed, welcome, start, blockedAt } = useShowController();
   const [tab, setTab] = useState<"show" | "setup">("show");
   const [solo, setSolo] = useState(false);
   const [panel, setPanel] = useState(false);
@@ -56,7 +60,15 @@ export function Operator() {
     return () => window.removeEventListener("keydown", onKey);
   }, [command, tab, solo, dialog]);
 
+  useEffect(() => {
+    if (blockedAt) showToast("Data belum lengkap. Cek daftar di atas tombol, lalu perbaiki di Setup", "warn");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [blockedAt]);
+
+  if (welcome) return <Welcome onStart={(k) => { start(k); setTab(k === "baru" ? "setup" : "show"); }} />;
   if (!state) return <div className="waiting">Memuat…</div>;
+  const checks = preflight(state);
+  const notStarted = state.draws.length === 0 && (state.scene.kind === "looping" || state.scene.kind === "end");
 
   const sc = state.scene;
   const nb = nextButton(state);
@@ -183,6 +195,7 @@ export function Operator() {
           <button className={tab === "setup" ? "on" : ""} onClick={() => setTab("setup")}>Setup</button>
           <button className={tab === "show" ? "on" : ""} onClick={() => setTab("show")}>Show</button>
         </div>
+        {state.sample && <span className="chip c-warn">! Data contoh</span>}
         <div className="grow" />
         <span className="hide-m">{showConnected ? <span className="chip c-go"><span className="dot" style={{ background: "var(--go-t)" }} />Layar LED terhubung</span> : <span className="chip c-neu">○ Layar LED belum dibuka</span>}</span>
         {saveFailed ? <span className="chip c-dng">✕ Gagal menyimpan</span> : <span className="chip c-info hide-m">i Tersimpan otomatis</span>}
@@ -206,9 +219,24 @@ export function Operator() {
             </button>
             <div className="card col" style={{ padding: 18 }}>
               {status}
-              <div className="preview"><ShowView state={state} /></div>
+              <div className="preview" style={{ position: "relative" }}>
+                <ShowView state={state} />
+                {notStarted && !preflightOk(checks) && (
+                  <div className="preview-empty">
+                    <b>Data acara belum lengkap</b>
+                    <span>Isi peserta dan hadiah di Setup untuk melihat show di sini.</span>
+                    <button className="btn b-sm b-sec" onClick={() => setTab("setup")}>Buka Setup</button>
+                  </div>
+                )}
+              </div>
             </div>
             {hangusArmed && <span className="chip c-dng" style={{ alignSelf: "start" }}>✕ Tekan H sekali lagi (3 detik) untuk menghanguskan</span>}
+            {notStarted && checks.some((c) => c.level !== "info") && (
+              <div className="card col" style={{ padding: 16, gap: 8 }}>
+                <div className="row"><div className="lbl">Cek sebelum show</div>{!preflightOk(checks) && <span className="chip c-dng right">✕ Belum bisa dimulai</span>}</div>
+                <PreflightList checks={checks} compact onGo={() => setTab("setup")} />
+              </div>
+            )}
             {controls}
             <div className="small muted hide-m">Clicker: <b>PageDown/→/Spasi</b> = lanjut · <b>PageUp/←</b> = kembali · <b>B</b> = layar hitam · <b>H×2</b> = hangus · <b>F</b> = fullscreen di jendela show</div>
           </div>
@@ -225,10 +253,10 @@ export function Operator() {
                   <div key={s.id} className={`sess ${current ? "current" : ""}`}>
                     <div className="row">
                       <b style={{ fontSize: 15 }}>{s.name}</b>
-                      {finished ? <span className="chip c-go right">✓ Selesai</span> : <span className="right small" style={{ fontWeight: 600 }}>{done}/{total}</span>}
+                      {s.prizes.length === 0 ? <span className="chip c-neu right">Belum ada hadiah</span> : finished ? <span className="chip c-go right">✓ Selesai</span> : <span className="right small" style={{ fontWeight: 600 }}>{done}/{total}</span>}
                       {!finished && !current && <button className="btn b-sm b-ghost" disabled={sc.kind === "draw" || sc.kind === "reveal"} onClick={() => dispatch({ type: "JUMP_SESSION", session: i, now: Date.now() })}>Lompat</button>}
                     </div>
-                    {!finished && <div className="progress" style={{ marginTop: 8 }}><i style={{ width: `${(done / Math.max(1, total)) * 100}%` }} /></div>}
+                    {!finished && s.prizes.length > 0 && <div className="progress" style={{ marginTop: 8 }}><i style={{ width: `${(done / Math.max(1, total)) * 100}%` }} /></div>}
                   </div>
                 );
               })}

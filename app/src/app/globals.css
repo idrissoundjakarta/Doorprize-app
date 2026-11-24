@@ -138,6 +138,7 @@ table.t { width: 100%; border-collapse: collapse; font-size: 14px; }
 /* ================= Setup ================= */
 .setup { display: grid; grid-template-columns: 240px minmax(0, 1fr) 380px; gap: 22px; padding: 0 28px 28px; align-items: start; }
 .steps { display: flex; flex-direction: column; gap: 4px; padding: 14px; position: sticky; top: 16px; }
+.steps-list { display: flex; flex-direction: column; gap: 4px; }
 .step { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 16px; text-align: left; width: 100%; }
 .step:hover { background: var(--g); }
 .step.on { background: var(--ink); color: var(--w); }
@@ -207,10 +208,31 @@ table.t { width: 100%; border-collapse: collapse; font-size: 14px; }
   .solo-panel { left: 8px; right: 8px; bottom: 8px; width: auto; }
   .toast { left: 14px; right: 14px; bottom: 14px; }
   .setup { grid-template-columns: 1fr; padding: 0 14px 20px; }
-  .steps { position: static; flex-direction: row; overflow-x: auto; }
+  .steps { position: static; }
+  .steps-list { flex-direction: row; overflow-x: auto; }
   .step small { display: none; }
   .op-main { padding: 0 14px 20px; }
   .op-controls { grid-template-columns: 1fr 1fr; }
   .op-controls .btn-next { grid-column: 1 / -1; order: -1; }
   .topbar { padding: 12px 14px; }
 }
+
+/* Halaman awal */
+.welcome { min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding: 32px 18px; }
+.welcome-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 280px)); gap: 16px; width: 100%; justify-content: center; }
+.welcome-card { background: var(--w); border-radius: 28px; padding: 24px; display: flex; flex-direction: column; gap: 8px; text-align: left; min-height: 230px; border: 2px solid transparent; transition: transform .15s, border-color .2s; }
+.welcome-card:hover { transform: translateY(-2px); border-color: var(--line); }
+.welcome-card.primary { background: var(--ink); color: var(--w); }
+.welcome-card b { font-size: 19px; margin-top: 8px; }
+.welcome-card > span:not(.welcome-ico):not(.go-ico) { font-size: 14px; opacity: .7; line-height: 1.5; }
+.welcome-ico { width: 48px; height: 48px; border-radius: 15px; display: grid; place-items: center; font-size: 20px; color: var(--ink); }
+@media (max-width: 620px) { .welcome-cards { grid-template-columns: 1fr; } .welcome-card { min-height: 0; } }
+
+/* Cek sebelum show */
+.pf-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; font-size: 13px; line-height: 1.4; width: 100%; }
+.pf-row:hover:not(:disabled) { background: var(--g); }
+.pf-row:disabled { cursor: default; }
+.preview-empty { position: absolute; inset: 0; background: rgba(20,20,20,.72); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; padding: 20px; backdrop-filter: blur(4px); }
+.preview-empty span { opacity: .75; font-size: 14px; max-width: 320px; }
+.preview-empty .btn { margin-top: 6px; color: var(--ink); }
+.steps .pf-row { font-size: 12px; padding: 6px 8px; }

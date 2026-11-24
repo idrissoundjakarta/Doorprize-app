@@ -3,13 +3,15 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type ReactNode } from "react";
 import { TEMPO_MS } from "@/engine/engine";
 import { uid } from "@/engine/rng";
-import { createShow, generateRange, sampleParticipants, sampleSessions } from "@/engine/sample";
+import { preflight, preflightOk } from "@/engine/preflight";
+import { createShow, emptyShow, generateRange, sampleParticipants, sampleSessions } from "@/engine/sample";
 import type { DrawStyle, Palette, Participant, Session, Settings, ShowState, Template, Theme } from "@/engine/types";
 import { paletteFromImage } from "@/lib/color";
 import { fileToDataUrl } from "@/lib/image";
 import { parseRows, readSpreadsheet } from "@/lib/import";
 import { FONTS, STYLE_INFO, TEMPLATE_PRESET } from "@/show/presets";
 import { ShowView } from "@/show/ShowView";
+import { PreflightList } from "./Preflight";
 import { Dialog, Toggle } from "./ui";
 
 type Props = { state: ShowState; setState: (s: ShowState) => void; onDone: () => void; toast: (m: string) => void };
@@ -45,6 +47,18 @@ export function Setup({ state, setState, onDone, toast }: Props) {
   };
   const save = () => (state.draws.length > 0 ? setConfirm(true) : apply());
 
+  // Selama show belum dimulai, perubahan peserta/sesi langsung tersimpan (tanpa tombol Simpan).
+  const running = state.draws.length > 0;
+  useEffect(() => {
+    if (!running && (sessions !== state.sessions || participants !== state.participants)) {
+      setState({ ...createShow(sessions, participants, st), sceneAt: Date.now() - 10_000 });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- hanya saat draf berubah
+  }, [sessions, participants]);
+
+  const checks = preflight({ settings: st, sessions, participants });
+  const [newEvent, setNewEvent] = useState(false);
+
   const summary: Record<Step, string> = {
     acara: st.eventTitle || "Belum diisi",
     tampilan: `${TEMPLATE_PRESET[st.theme.template].label}`,
@@ -64,6 +78,7 @@ export function Setup({ state, setState, onDone, toast }: Props) {
     <div className="setup">
       <nav className="card steps">
         <div className="lbl" style={{ margin: "4px 10px 10px" }}>Langkah setup</div>
+        <div className="steps-list">
         {STEPS.map((s, i) => (
           <button key={s.id} className={`step ${step === s.id ? "on" : done[s.id] ? "done" : ""}`} onClick={() => setStep(s.id)}>
             <span className="n">{done[s.id] && step !== s.id ? "✓" : i + 1}</span>
@@ -73,13 +88,21 @@ export function Setup({ state, setState, onDone, toast }: Props) {
             </span>
           </button>
         ))}
+        </div>
         <div style={{ height: 10 }} />
-        {dirty ? (
-          <button className="btn b-pri" onClick={save}>Simpan perubahan <span className="go-ico" style={{ width: 26, height: 26 }}>✓</span></button>
+        {dirty && running ? (
+          <>
+            <button className="btn b-pri" onClick={save}>Simpan perubahan <span className="go-ico" style={{ width: 26, height: 26 }}>✓</span></button>
+            <span className="chip c-warn" style={{ marginTop: 8, whiteSpace: "normal" }}>! Show sudah berjalan. Perubahan peserta/sesi belum disimpan</span>
+          </>
         ) : (
-          <button className="btn b-pri" onClick={onDone}>Ke layar show <span className="go-ico" style={{ width: 26, height: 26 }}>→</span></button>
+          <button className="btn b-pri" onClick={onDone} disabled={!preflightOk(checks)}>Ke layar show <span className="go-ico" style={{ width: 26, height: 26 }}>→</span></button>
         )}
-        {dirty && <span className="chip c-warn" style={{ marginTop: 8, whiteSpace: "normal" }}>! Peserta/sesi berubah, belum disimpan</span>}
+        <div className="pf-box">
+          <div className="lbl" style={{ margin: "14px 10px 6px" }}>Cek sebelum show</div>
+          <PreflightList checks={checks} onGo={setStep} compact />
+        </div>
+        <button className="btn b-sm b-ghost" style={{ marginTop: 10 }} onClick={() => setNewEvent(true)}>Mulai acara baru</button>
       </nav>
 
       <main className="col">
@@ -107,6 +130,11 @@ export function Setup({ state, setState, onDone, toast }: Props) {
         </div>
       </aside>
 
+      {newEvent && (
+        <Dialog title="Mulai acara baru?" confirm="Ya, mulai dari kosong" onCancel={() => setNewEvent(false)} onConfirm={() => { const e = emptyShow(); setSessions(e.sessions); setParticipants(e.participants); setState(e); setNewEvent(false); setStep("acara"); toast("Acara baru siap diisi"); }}>
+          Semua data acara ini (peserta, sesi, hadiah, logo, warna, <b style={{ color: "var(--ink)" }}>dan daftar pemenang</b>) akan dihapus dari perangkat ini. Export dulu daftar pemenang kalau masih dibutuhkan.
+        </Dialog>
+      )}
       {confirm && (
         <Dialog title="Simpan dan mulai ulang show?" confirm="Ya, simpan" onCancel={() => setConfirm(false)} onConfirm={apply}>
           Show sudah berjalan ({state.draws.length} hasil undian). Mengubah peserta atau sesi akan <b style={{ color: "var(--ink)" }}>mengosongkan daftar pemenang</b> dan memulai show dari awal. Export dulu kalau masih dibutuhkan.

@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { autoDuration, reduce, resumeAfterReload } from "@/engine/engine";
-import { sampleShow } from "@/engine/sample";
+import { preflight, preflightOk } from "@/engine/preflight";
+import { emptyShow, sampleShow } from "@/engine/sample";
 import type { Action, ShowState } from "@/engine/types";
 import { openChannel, type Command, type Message } from "./channel";
 import { loadShow, requestPersistence, saveShow } from "./storage";
@@ -18,6 +19,10 @@ export function useShowController() {
   const [hangusArmed, setHangusArmed] = useState(false);
   const [showAliveAt, setShowAliveAt] = useState(0);
   const [saveFailed, setSaveFailed] = useState(false);
+  /** Waktu terakhir operator mencoba mulai padahal data belum lengkap. */
+  const [blockedAt, setBlockedAt] = useState(0);
+  /** true = belum ada data tersimpan: tampilkan halaman awal (acara baru / data contoh). */
+  const [welcome, setWelcome] = useState(false);
   const stateRef = useRef<ShowState | null>(null);
   const armedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const channel = useRef<ReturnType<typeof openChannel> | null>(null);
@@ -25,7 +30,10 @@ export function useShowController() {
 
   // Muat data tersimpan (atau data contoh) saat dibuka.
   useEffect(() => {
-    void loadShow().then((saved) => setState(saved ? resumeAfterReload(saved, Date.now()) : sampleShow()));
+    void loadShow().then((saved) => {
+      if (saved) setState(resumeAfterReload(saved, Date.now()));
+      else setWelcome(true);
+    });
     void requestPersistence();
   }, []);
 
@@ -47,10 +55,17 @@ export function useShowController() {
     (cmd: Command) => {
       const now = Date.now();
       switch (cmd) {
-        case "next":
+        case "next": {
           disarm();
+          // Show belum dimulai & data belum lengkap: jangan mulai, beri tahu operator.
+          const st = stateRef.current;
+          if (st && st.draws.length === 0 && (st.scene.kind === "looping" || st.scene.kind === "end") && !preflightOk(preflight(st))) {
+            setBlockedAt(now);
+            break;
+          }
           dispatch({ type: "NEXT", now });
           break;
+        }
         case "back":
           disarm();
           dispatch({ type: "BACK", now });
@@ -118,5 +133,11 @@ export function useShowController() {
     dispatch({ type: "HANGUS", now: Date.now() });
   }, [disarm, dispatch]);
 
-  return { state, setState, dispatch, command, hangusNow, hangusArmed, showConnected, saveFailed };
+  /** Mulai acara: kosong (setup dari awal) atau data contoh. */
+  const start = useCallback((kind: "baru" | "contoh") => {
+    setState(kind === "baru" ? emptyShow() : sampleShow());
+    setWelcome(false);
+  }, []);
+
+  return { state, setState, dispatch, command, hangusNow, hangusArmed, showConnected, saveFailed, welcome, start, blockedAt };
 }

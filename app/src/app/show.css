@@ -90,10 +90,12 @@
 .ring-inner .sub { color: var(--t); font-size: 3cqmin; margin-top: .6cqmin; }
 
 /* Reveal */
-.hit { animation: hit .8s cubic-bezier(.2,1.4,.3,1) both; }
-@keyframes hit { 0% { opacity: .35; transform: scale(1.5); filter: blur(1.2cqmin); } 60% { opacity: 1; filter: none; } 100% { transform: none; } }
+.hit { animation: hit .9s cubic-bezier(.2,1.2,.3,1) both; }
+/* Nomor pemenang langsung terlihat (menyambung dari animasi undi), lalu "menghantam" dengan kilatan. */
+@keyframes hit { 0% { opacity: .9; transform: scale(1.22); filter: brightness(2.2) drop-shadow(0 0 6cqmin var(--p2)); } 45% { opacity: 1; } 100% { transform: none; filter: drop-shadow(0 0 4cqmin color-mix(in srgb, var(--p) 45%, transparent)); } }
 .glow { filter: drop-shadow(0 0 4cqmin color-mix(in srgb, var(--p) 45%, transparent)); }
 .reveal .big-number { margin: 1cqmin 0 .4cqmin; }
+.reveal .kicker { animation-duration: .5s; }
 
 /* ================= Gaya undian ================= */
 .draw-kicker { margin-bottom: 5cqmin; }

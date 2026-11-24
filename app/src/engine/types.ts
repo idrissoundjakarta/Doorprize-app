@@ -103,6 +103,8 @@ export type ShowState = {
   sceneAt: number;
   /** Layar hitam: konten disembunyikan, background + brand tetap. */
   blank: boolean;
+  /** true kalau masih memakai data contoh (ditandai di UI supaya tidak terbawa ke acara asli). */
+  sample?: boolean;
 };
 
 export type Action =

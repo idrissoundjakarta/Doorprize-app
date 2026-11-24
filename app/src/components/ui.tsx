@@ -36,8 +36,8 @@ export function Dialog({ tone = "dng", icon = "✕", title, children, confirm, o
 }
 
 /** Notifikasi singkat di pojok kanan bawah. */
-export function useToast(): [ReactNode, (msg: string) => void] {
-  const [msg, setMsg] = useState<{ text: string; id: number } | null>(null);
+export function useToast(): [ReactNode, (msg: string, tone?: "go" | "warn") => void] {
+  const [msg, setMsg] = useState<{ text: string; id: number; tone: "go" | "warn" } | null>(null);
   useEffect(() => {
     if (!msg) return;
     const t = setTimeout(() => setMsg(null), 2400);
@@ -45,11 +45,15 @@ export function useToast(): [ReactNode, (msg: string) => void] {
   }, [msg]);
   const node = msg ? (
     <div className="toast" key={msg.id}>
-      <span className="go-ico" style={{ width: 26, height: 26, fontSize: 13 }}>✓</span>
+      {msg.tone === "warn" ? (
+        <span className="go-ico" style={{ width: 26, height: 26, fontSize: 13, background: "var(--warn-bg)", color: "var(--warn-t)" }}>!</span>
+      ) : (
+        <span className="go-ico" style={{ width: 26, height: 26, fontSize: 13 }}>✓</span>
+      )}
       {msg.text}
     </div>
   ) : null;
-  return [node, (text: string) => setMsg({ text, id: Date.now() })];
+  return [node, (text: string, tone: "go" | "warn" = "go") => setMsg({ text, id: Date.now(), tone })];
 }
 
 export function Toggle({ on, onChange, label }: { on: boolean; onChange: (v: boolean) => void; label: string }) {
