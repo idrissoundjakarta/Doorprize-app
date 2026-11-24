@@ -48,7 +48,8 @@ export function Setup({ state, setState, onDone, toast }: Props) {
   const save = () => (state.draws.length > 0 ? setConfirm(true) : apply());
 
   // Selama show belum dimulai, perubahan peserta/sesi langsung tersimpan (tanpa tombol Simpan).
-  const running = state.draws.length > 0;
+  // Saat gladi, mengubah data cukup mengulang gladi (tidak perlu konfirmasi).
+  const running = state.draws.length > 0 && !state.rehearsal;
   useEffect(() => {
     if (!running && (sessions !== state.sessions || participants !== state.participants)) {
       setState({ ...createShow(sessions, participants, st), sceneAt: Date.now() - 10_000 });

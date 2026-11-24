@@ -192,7 +192,8 @@ Sebelum brainstorming, sempat dibuat prototipe satu file HTML. Kalau saya upload
   - Perubahan peserta/sesi **tersimpan otomatis selama show belum dimulai**; konfirmasi hanya kalau show sudah berjalan.
   - Tombol "Mulai acara baru" di Setup (dengan konfirmasi).
   - Layar pemenang menyambung dari animasi undi (tanpa jeda kosong).
-  - Berikutnya: mode gladi yang jelas, daftar urutan show (cue list) di jendela operator.
+  - **Mode gladi**: tombol Mulai gladi (hanya sebelum ada hasil asli) / Selesai gladi. Selama gladi ada tanda kecil "GLADI" di layar LED, banner di operator, export dinonaktifkan; saat selesai semua hasil gladi dihapus dan show kembali ke awal.
+  - **Urutan show (cue list)** di jendela operator: semua adegan dari awal sampai penutup per sesi (Looping, Opener, Showcase, Ready, Undi n/m), status selesai / LIVE / berikutnya / dilewati, gulung otomatis ke adegan sekarang, lompat sesi dari sini.
 
 ### Rencana MVP (ringkas)
 

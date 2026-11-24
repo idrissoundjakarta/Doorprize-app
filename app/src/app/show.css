@@ -139,3 +139,6 @@
 .engrave.lit, .engrave.full { position: absolute; left: 10cqmin; top: 6cqmin; text-shadow: none; }
 .engrave.lit { color: transparent; background: linear-gradient(105deg, transparent 0%, transparent 33%, var(--p) 44%, #fff8e6 50%, var(--p) 56%, transparent 67%, transparent 100%); background-size: 260% 100%; -webkit-background-clip: text; background-clip: text; }
 .beam { position: absolute; left: 50%; top: 50%; width: 22cqmin; height: 160cqmin; margin: -80cqmin 0 0 -11cqmin; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--p2) 30%, transparent), transparent); filter: blur(3cqmin); pointer-events: none; }
+
+/* Tanda gladi (kecil, pojok kanan bawah) */
+.rehearsal-badge { position: absolute; right: 3cqw; bottom: 3cqh; z-index: 4; font: 700 1.5cqmin var(--fb); letter-spacing: .3em; padding: .7cqmin 1.6cqmin .7cqmin 1.9cqmin; border-radius: 99px; color: var(--t); background: color-mix(in srgb, var(--bg2) 60%, transparent); border: .12cqmin solid color-mix(in srgb, var(--t) 35%, transparent); }

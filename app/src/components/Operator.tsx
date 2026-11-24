@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SCENE_LABEL, SCENE_MODE, describeNext, eligible, firstOpenPrize, getDraw, getParticipant, getPrize, remaining } from "@/engine/engine";
+import { SCENE_LABEL, SCENE_MODE, describeNext, eligible, getDraw, getParticipant, getPrize } from "@/engine/engine";
 import type { ShowState } from "@/engine/types";
 import { download, winnersCsv } from "@/lib/export";
 import { keyToCommand, toggleFullscreen } from "@/lib/keys";
@@ -10,6 +10,7 @@ import { ShowView } from "@/show/ShowView";
 import { unlockAudio } from "@/show/sound";
 import { Setup } from "./Setup";
 import { preflight, preflightOk } from "@/engine/preflight";
+import { CueList } from "./CueList";
 import { PreflightList } from "./Preflight";
 import { SoloShow } from "./SoloShow";
 import { Welcome } from "./Welcome";
@@ -42,7 +43,7 @@ export function Operator() {
   const [tab, setTab] = useState<"show" | "setup">("show");
   const [solo, setSolo] = useState(false);
   const [panel, setPanel] = useState(false);
-  const [dialog, setDialog] = useState<null | "hangus" | "restart">(null);
+  const [dialog, setDialog] = useState<null | "hangus" | "restart" | "endGladi">(null);
   const [toast, showToast] = useToast();
 
   useEffect(() => {
@@ -75,6 +76,12 @@ export function Operator() {
   const revealDraw = sc.kind === "reveal" ? getDraw(state, sc.drawId) : undefined;
   const revealWho = revealDraw && getParticipant(state, revealDraw.participantId);
   const revealPrize = sc.kind === "reveal" ? getPrize(state, sc.session, sc.prize) : undefined;
+
+  const gladiButton = state.rehearsal ? (
+    <button className="btn b-sm b-pri" onClick={() => setDialog("endGladi")}>Selesai gladi</button>
+  ) : state.draws.length === 0 ? (
+    <button className="btn b-sm b-sec" onClick={() => { dispatch({ type: "START_REHEARSAL", now: Date.now() }); showToast("Mode gladi dimulai. Hasilnya tidak disimpan"); }}>Mulai gladi</button>
+  ) : null;
 
   const controls = (
     <div className="op-controls">
@@ -117,6 +124,11 @@ export function Operator() {
           Semua hasil undian (termasuk yang hangus) akan dihapus. Biasanya dipakai setelah gladi. Export dulu kalau masih dibutuhkan.
         </Dialog>
       )}
+      {dialog === "endGladi" && (
+        <Dialog tone="go" icon="✓" title="Selesaikan gladi?" confirm="Ya, show siap" onCancel={() => setDialog(null)} onConfirm={() => { dispatch({ type: "END_REHEARSAL", now: Date.now() }); setDialog(null); showToast("Gladi selesai. Hasil latihan dihapus, show siap untuk acara"); }}>
+          Semua hasil undian gladi ({state.draws.length}) dihapus dan show kembali ke awal. Pengaturan, peserta, dan hadiah tetap.
+        </Dialog>
+      )}
       {toast}
     </>
   );
@@ -141,6 +153,7 @@ export function Operator() {
               {controls}
               <div className="row wrap">
                 <button className={`btn b-sm ${state.blank ? "b-pri" : "b-sec"}`} onClick={() => command("blank")}>{state.blank ? "Tampilkan lagi" : "Layar hitam"} <span className="kbd hide-m">B</span></button>
+                {gladiButton}
                 <button className="btn b-sm b-ghost" onClick={() => setPanel(false)}>Tutup menu</button>
                 <button className="btn b-sm b-ghost right" onClick={exitSolo}>Keluar dari show</button>
               </div>
@@ -196,14 +209,16 @@ export function Operator() {
           <button className={tab === "show" ? "on" : ""} onClick={() => setTab("show")}>Show</button>
         </div>
         {state.sample && <span className="chip c-warn">! Data contoh</span>}
+        {state.rehearsal && <span className="chip c-info"><span className="dot" style={{ background: "var(--info-t)" }} />Mode gladi</span>}
         <div className="grow" />
-        <span className="hide-m">{showConnected ? <span className="chip c-go"><span className="dot" style={{ background: "var(--go-t)" }} />Layar LED terhubung</span> : <span className="chip c-neu">○ Layar LED belum dibuka</span>}</span>
-        {saveFailed ? <span className="chip c-dng">✕ Gagal menyimpan</span> : <span className="chip c-info hide-m">i Tersimpan otomatis</span>}
+        <span className="hide-m">{showConnected ? <span className="chip c-go"><span className="dot" style={{ background: "var(--go-t)" }} />LED terhubung</span> : <span className="chip c-neu">○ LED belum dibuka</span>}</span>
+        {saveFailed ? <span className="chip c-dng">✕ Gagal menyimpan</span> : <span className="small muted hide-m" title="Semua perubahan tersimpan otomatis di perangkat ini">✓ Tersimpan</span>}
         {tab === "show" && (
           <>
+            {gladiButton}
             <button className={`btn b-sm hide-m ${state.blank ? "b-pri" : "b-sec"}`} onClick={() => command("blank")}>Layar hitam <span className="kbd">B</span></button>
-            <button className="btn b-sm b-sec hide-m" onClick={openShowWindow}>Buka jendela show</button>
-            <button className="btn b-sm b-ghost hide-m" onClick={startSolo}>Mode satu layar</button>
+            <button className="btn b-sm b-sec hide-m" onClick={openShowWindow}>Buka layar LED</button>
+            <button className="btn b-sm b-ghost hide-m" onClick={startSolo} title="Show di layar ini (laptop tanpa layar kedua, atau HP)">Satu layar</button>
           </>
         )}
       </header>
@@ -231,6 +246,13 @@ export function Operator() {
               </div>
             </div>
             {hangusArmed && <span className="chip c-dng" style={{ alignSelf: "start" }}>✕ Tekan H sekali lagi (3 detik) untuk menghanguskan</span>}
+            {state.rehearsal && (
+              <div className="card row wrap" style={{ padding: 16, background: "var(--info-bg)", color: "var(--info-t)" }}>
+                <span className="dot" style={{ background: "var(--info-t)", width: 12, height: 12 }} />
+                <div className="grow" style={{ minWidth: 200 }}><b>Mode gladi</b><div className="small" style={{ opacity: .85 }}>Undian di sini hanya latihan. Tanda GLADI tampil kecil di layar LED. Hasilnya dihapus saat gladi selesai.</div></div>
+                <button className="btn b-sm b-pri" onClick={() => setDialog("endGladi")}>Selesai gladi</button>
+              </div>
+            )}
             {notStarted && checks.some((c) => c.level !== "info") && (
               <div className="card col" style={{ padding: 16, gap: 8 }}>
                 <div className="row"><div className="lbl">Cek sebelum show</div>{!preflightOk(checks) && <span className="chip c-dng right">✕ Belum bisa dimulai</span>}</div>
@@ -243,30 +265,15 @@ export function Operator() {
 
           <div className="col">
             <div className="card col">
-              <div className="lbl">Progres show</div>
-              {state.sessions.map((s, i) => {
-                const total = s.prizes.reduce((n, p) => n + p.qty, 0);
-                const done = total - s.prizes.reduce((n, p) => n + remaining(state, p), 0);
-                const finished = firstOpenPrize(state, i) === null;
-                const current = "session" in sc && sc.session === i;
-                return (
-                  <div key={s.id} className={`sess ${current ? "current" : ""}`}>
-                    <div className="row">
-                      <b style={{ fontSize: 15 }}>{s.name}</b>
-                      {s.prizes.length === 0 ? <span className="chip c-neu right">Belum ada hadiah</span> : finished ? <span className="chip c-go right">✓ Selesai</span> : <span className="right small" style={{ fontWeight: 600 }}>{done}/{total}</span>}
-                      {!finished && !current && <button className="btn b-sm b-ghost" disabled={sc.kind === "draw" || sc.kind === "reveal"} onClick={() => dispatch({ type: "JUMP_SESSION", session: i, now: Date.now() })}>Lompat</button>}
-                    </div>
-                    {!finished && s.prizes.length > 0 && <div className="progress" style={{ marginTop: 8 }}><i style={{ width: `${(done / Math.max(1, total)) * 100}%` }} /></div>}
-                  </div>
-                );
-              })}
+              <div className="row"><div className="lbl">Urutan show</div><span className="small muted right">{state.sessions.filter((x) => x.prizes.length).length} sesi</span></div>
+              <CueList state={state} onJump={(i) => dispatch({ type: "JUMP_SESSION", session: i, now: Date.now() })} />
             </div>
 
             <div className="card col">
               <div className="row">
-                <div className="lbl">Pemenang</div>
+                <div className="lbl">{state.rehearsal ? "Pemenang gladi" : "Pemenang"}</div>
                 <span className="chip c-champ">★ {state.draws.filter((d) => d.status === "sah").length}</span>
-                <button className="btn b-sm b-sec right" onClick={exportCsv} disabled={state.draws.length === 0}>Export Excel</button>
+                <button className="btn b-sm b-sec right" onClick={exportCsv} disabled={state.draws.length === 0 || !!state.rehearsal} title={state.rehearsal ? "Hasil gladi tidak diexport" : undefined}>Export Excel</button>
               </div>
               <div className="winners">
                 {state.draws.length === 0 ? (
@@ -291,7 +298,7 @@ export function Operator() {
                   </table>
                 )}
               </div>
-              <button className="btn b-sm b-ghost" onClick={() => setDialog("restart")}>Mulai ulang show</button>
+              {!state.rehearsal && <button className="btn b-sm b-ghost" onClick={() => setDialog("restart")}>Mulai ulang show</button>}
             </div>
           </div>
         </div>

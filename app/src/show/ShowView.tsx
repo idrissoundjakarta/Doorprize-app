@@ -59,6 +59,7 @@ export function ShowView({ state, audio = false }: { state: ShowState; audio?: b
       {sc.kind === "reveal" && !state.blank && <Confetti key={state.sceneSeq} colors={confettiColors} seed={state.sceneSeq} big={grand} />}
 
       <Brand state={state} compact={sc.kind === "draw" || sc.kind === "reveal"} />
+      {state.rehearsal && <div className="rehearsal-badge">GLADI</div>}
 
       <div className={`content ${state.blank ? "hidden" : ""}`}>
         <div className={`scene scene-${sc.kind}`} key={state.sceneSeq}>

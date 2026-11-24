@@ -105,6 +105,8 @@ export type ShowState = {
   blank: boolean;
   /** true kalau masih memakai data contoh (ditandai di UI supaya tidak terbawa ke acara asli). */
   sample?: boolean;
+  /** Mode gladi: hasil undian hanya latihan dan dibersihkan saat gladi selesai. */
+  rehearsal?: boolean;
 };
 
 export type Action =
@@ -114,4 +116,6 @@ export type Action =
   | { type: "HANGUS"; now: number }
   | { type: "TOGGLE_BLANK" }
   | { type: "JUMP_SESSION"; session: number; now: number }
-  | { type: "RESTART"; now: number };
+  | { type: "RESTART"; now: number }
+  | { type: "START_REHEARSAL"; now: number }
+  | { type: "END_REHEARSAL"; now: number };

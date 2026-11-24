@@ -236,3 +236,22 @@ table.t { width: 100%; border-collapse: collapse; font-size: 14px; }
 .preview-empty span { opacity: .75; font-size: 14px; max-width: 320px; }
 .preview-empty .btn { margin-top: 6px; color: var(--ink); }
 .steps .pf-row { font-size: 12px; padding: 6px 8px; }
+
+/* Urutan show (cue list) */
+.cues { max-height: 46vh; overflow: auto; display: flex; flex-direction: column; gap: 4px; margin: 0 -6px; padding: 0 6px; }
+.cue-group { padding: 8px 10px; border-radius: 16px; }
+.cue-group.current { background: var(--g); }
+.cue-head { min-height: 34px; }
+.cue-items { display: flex; flex-direction: column; margin: 4px 0 2px 20px; border-left: 2px solid var(--line); }
+.cue { display: grid; grid-template-columns: 22px auto 1fr auto; align-items: center; gap: 8px; padding: 5px 8px; font-size: 13px; border-radius: 10px; margin-left: 6px; }
+.cue-ico { font-size: 11px; text-align: center; color: var(--mut); }
+.cue-label { font-weight: 600; white-space: nowrap; }
+.cue-sub { color: var(--mut); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cue.done { color: var(--mut); }
+.cue.done .cue-ico { color: var(--go-t); }
+.cue.current { background: var(--ink); color: var(--w); }
+.cue.current .cue-ico, .cue.current .cue-sub { color: rgba(255,255,255,.75); }
+.cue.current .chip { background: #ff6b5b; }
+.cue.next { background: var(--w); outline: 1px dashed #d4d4d4; }
+.cue.skipped { color: var(--mut); font-style: italic; }
+@media (max-width: 760px), (pointer: coarse) and (max-width: 1000px) { .cues { max-height: none; } }

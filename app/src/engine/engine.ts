@@ -148,6 +148,18 @@ export function reduce(state: ShowState, action: Action, rand: RandomInt = secur
     case "TOGGLE_BLANK":
       return { ...state, blank: !state.blank };
 
+    case "START_REHEARSAL": {
+      // Gladi hanya boleh dimulai sebelum ada hasil undian asli.
+      if (state.rehearsal || state.draws.length > 0) return state;
+      return go({ ...state, rehearsal: true }, initialScene(state), action.now);
+    }
+
+    case "END_REHEARSAL": {
+      if (!state.rehearsal) return state;
+      const base = { ...state, draws: [] as Draw[], rehearsal: false };
+      return go(base, initialScene(base), action.now);
+    }
+
     case "RESTART": {
       const base = { ...state, draws: [] as Draw[] };
       return go(base, initialScene(base), action.now);

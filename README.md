@@ -7,11 +7,11 @@ Aplikasi undian doorprize untuk event corporate (gathering, gala dinner, family 
 
 ## Cara mencoba (5 menit)
 
-1. Buka link prototipe. Data contoh (500 kupon, 3 sesi, 10 hadiah) sudah terisi.
-2. Klik **Buka jendela show** (izinkan pop-up). Kalau ada layar kedua, seret jendela itu ke sana lalu tekan **F**. Klik sekali di jendela show supaya suara aktif.
+1. Buka link prototipe, pilih **Coba dengan data contoh** (500 kupon, 3 sesi, 10 hadiah) atau **Buat acara baru**.
+2. Klik **Buka layar LED** (izinkan pop-up). Kalau ada layar kedua, seret jendela itu ke sana lalu tekan **F**. Klik sekali di jendela show supaya suara aktif.
 3. Tekan **PageDown / Spasi** untuk lanjut. Di layar pemenang, tombol **Hangus** mengundi ulang.
 4. Tab **Setup**: ganti logo, ambil warna dari KV, pilih font, upload Excel peserta, foto hadiah, dan 5 gaya undian.
-5. Tekan **Mulai ulang show** kalau ingin mengulang dari awal.
+5. Mau latihan dulu? Tekan **Mulai gladi**. Hasil gladi tidak dihitung dan otomatis dihapus saat menekan **Selesai gladi**.
 
 **Dari HP:** buka link yang sama, isi Setup, lalu tekan **Tampilkan show di HP ini**. Putar HP mendatar. Tap layar = lanjut, tahan = menu operator (hangus, layar hitam, keluar). Sambungkan HP ke LED lewat kabel USB-C→HDMI atau screen mirroring. Di iPhone, pakai *Bagikan → Tambahkan ke Layar Utama* supaya tampil layar penuh.
 
