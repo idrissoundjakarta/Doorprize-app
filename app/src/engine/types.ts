@@ -38,7 +38,7 @@ export type Draw = {
   at: number;
 };
 
-export type DrawStyle = "digit" | "reel" | "amplop" | "debu" | "sorot";
+export type DrawStyle = "digit" | "reel" | "amplop" | "debu" | "sorot" | "kado";
 export type Tempo = "cepat" | "normal" | "dramatis";
 export type Template = "gala" | "neon" | "navy";
 

@@ -195,6 +195,8 @@ Sebelum brainstorming, sempat dibuat prototipe satu file HTML. Kalau saya upload
   - **Mode gladi**: tombol Mulai gladi (hanya sebelum ada hasil asli) / Selesai gladi. Selama gladi ada tanda kecil "GLADI" di layar LED, banner di operator, export dinonaktifkan; saat selesai semua hasil gladi dihapus dan show kembali ke awal.
   - **Urutan show (cue list)** di jendela operator: semua adegan dari awal sampai penutup per sesi (Looping, Opener, Showcase, Ready, Undi n/m), status selesai / LIVE / berikutnya / dilewati, gulung otomatis ke adegan sekarang, lompat sesi dari sini.
 
+- **Elemen 3D** (24 Nov 2026): dibuat live dengan **Three.js** (library di atas WebGL), bentuk dibuat dari kode, warna ikut palet KV, dimuat hanya saat dipakai. Referensi gaya dari gambar stok (Magnific/Pinterest) hanya sebagai inspirasi, tidak memakai asetnya. Urutan: (1) gaya undian ke-6 **Kado kejutan** ✓, (3) podium 3D + sorot lampu di Showcase, (2) ornamen 3D (balon, kado kecil, pita) di layar pemenang, jumlah & jenis ikut template. Asumsi: tetap lancar di laptop kantor & HP menengah; mode hemat sebagai cadangan.
+
 ### Rencana MVP (ringkas)
 
 1. Setup: sesi & hadiah (nama, jumlah, foto, urutan), peserta (generate rentang / paste / upload xlsx-csv, pilih kolom, bersihkan data), brand (logo, judul acara), tampilan (template generatif, warna, font, opsi ambil palet dari KV), gaya & tempo undian.

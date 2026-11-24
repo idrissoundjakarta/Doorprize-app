@@ -41,4 +41,5 @@ export const STYLE_INFO: Record<DrawStyle, { label: string; desc: string }> = {
   amplop: { label: "Amplop emas", desc: "Elegan · ala malam penghargaan" },
   debu: { label: "Debu emas", desc: "Elegan + wah · partikel jadi nomor" },
   sorot: { label: "Sorot cahaya", desc: "Elegan · ukiran disapu cahaya" },
+  kado: { label: "Kado kejutan", desc: "Meriah · kotak kado 3D terbuka" },
 };

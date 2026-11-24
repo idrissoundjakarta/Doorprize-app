@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { DrawStyle, Participant, ShowState } from "@/engine/types";
 import { fit } from "@/lib/fit";
-import { isLightPalette } from "@/lib/color";
+import { hexToRgb, isLightPalette, mix, rgbToHex } from "@/lib/color";
 import { sfxSwell, sfxTick } from "./sound";
 
 /**
@@ -60,6 +60,8 @@ export function DrawStyleView({ style, ...props }: DrawProps & { style: DrawStyl
       return <Debu {...props} />;
     case "sorot":
       return <Sorot {...props} />;
+    case "kado":
+      return <Kado {...props} />;
     default:
       return <Digits {...props} />;
   }
@@ -257,5 +259,53 @@ function Sorot({ winner, p, audio }: DrawProps) {
         <div className="engrave full gold-text" style={{ fontSize: fs, opacity: full }}>{winner.number}</div>
       </div>
     </div>
+  );
+}
+
+// ---------- 6. Kado kejutan (3D) ----------
+function Kado({ state, winner, p, audio, duration }: DrawProps) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  const pal = state.settings.theme.palette;
+  const light = isLightPalette(pal);
+  const hemat = state.settings.theme.quality === "hemat";
+  const { sceneAt } = state;
+  useEffect(() => {
+    if (audio) sfxSwell();
+  }, [audio]);
+  useTickOn(p >= 0.7 ? 1 : 0, audio, 1);
+  useEffect(() => {
+    let alive = true, raf = 0, dispose = () => {};
+    const cv = ref.current!;
+    void import("./three/giftScene").then(({ createGiftScene }) => {
+      if (!alive) return;
+      const mobile = window.matchMedia("(pointer: coarse)").matches && Math.min(screen.width, screen.height) < 900;
+      // KV gelap: kotak putih mutiara + pita aksen (emas). KV terang: kotak warna aksen + pita putih.
+      const box = light ? pal.primary : rgbToHex(mix(hexToRgb(pal.text), [255, 255, 255], 0.5));
+      const g = createGiftScene(cv, { box, ribbon: light ? "#F2F2F2" : pal.primary, glow: pal.primary2, hemat: hemat || mobile });
+      dispose = g.dispose;
+      const t0 = performance.now();
+      const loop = () => {
+        raf = requestAnimationFrame(loop);
+        const cw = cv.clientWidth, ch = cv.clientHeight;
+        const [w, h] = g.size();
+        if (cw !== w || ch !== h) g.resize(cw, ch);
+        g.update(Math.min(1, (Date.now() - sceneAt) / duration), (performance.now() - t0) / 1000);
+      };
+      loop();
+    });
+    return () => {
+      alive = false;
+      cancelAnimationFrame(raf);
+      dispose();
+    };
+  }, [sceneAt, duration, pal.bg1, pal.primary, pal.primary2, light, hemat]);
+  const rise = easeOut(seg(p, 0.76, 0.97));
+  return (
+    <>
+      <canvas ref={ref} className="gift-canvas" />
+      <div className="kado-num gold-text" style={{ fontSize: fit(winner.number, 26, 70), opacity: Math.min(1, rise * 2.5), transform: `translateY(${(1 - rise) * 30}cqh) scale(${0.3 + rise * 0.7})` }}>
+        {winner.number}
+      </div>
+    </>
   );
 }
