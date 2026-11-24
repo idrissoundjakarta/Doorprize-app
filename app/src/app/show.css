@@ -156,3 +156,6 @@
 .showcase-pill { position: absolute; left: 50%; top: 24cqh; transform: translateX(-50%); margin: 0; }
 .showcase-pill.a-up { animation-name: upCenter; }
 @keyframes upCenter { from { opacity: 0; transform: translate(-50%, 3cqmin); } to { opacity: 1; transform: translateX(-50%); } }
+
+/* Ornamen 3D di layar pemenang (di belakang teks, di depan background) */
+.ornament-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }

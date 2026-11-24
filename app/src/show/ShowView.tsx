@@ -7,6 +7,7 @@ import { fit } from "@/lib/fit";
 import { isLightPalette } from "@/lib/color";
 import { Background } from "./Background";
 import { Confetti } from "./Confetti";
+import { Ornaments3D } from "./Ornaments3D";
 import { Podium3D } from "./Podium3D";
 import { DrawStyleView, useProgress } from "./DrawStyles";
 import { sfxFanfare, sfxRise, sfxSwell } from "./sound";
@@ -57,6 +58,7 @@ export function ShowView({ state, audio = false }: { state: ShowState; audio?: b
   return (
     <div className={`stage ${isLightPalette(pal) ? "light" : "dark"}`} style={vars}>
       <Background theme={th} intensity={intensity} />
+      {sc.kind === "reveal" && !state.blank && <Ornaments3D key={`o${state.sceneSeq}`} state={state} grand={grand} />}
       {sc.kind === "reveal" && !state.blank && <Confetti key={state.sceneSeq} colors={confettiColors} seed={state.sceneSeq} big={grand} />}
 
       <Brand state={state} compact={sc.kind === "draw" || sc.kind === "reveal"} />
