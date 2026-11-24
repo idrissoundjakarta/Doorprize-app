@@ -7,6 +7,7 @@ import { fit } from "@/lib/fit";
 import { isLightPalette } from "@/lib/color";
 import { Background } from "./Background";
 import { Confetti } from "./Confetti";
+import { Podium3D } from "./Podium3D";
 import { DrawStyleView, useProgress } from "./DrawStyles";
 import { sfxFanfare, sfxRise, sfxSwell } from "./sound";
 
@@ -164,13 +165,11 @@ function SceneContent({ state, audio }: { state: ShowState; audio: boolean }) {
       const prize = getPrize(state, sc.session, sc.prize)!;
       return (
         <>
+          <Podium3D state={state} grand={/grand/i.test(session.name)} />
           <div className="corner a-fade">{session.name} · Hadiah {sc.prize + 1} dari {session.prizes.length}</div>
-          <div className="stack">
-            <div className="float-wrap a-photo"><PrizePhoto prize={prize} className="float" /></div>
-            <div className="reflect a-fade d2" />
-            <div className="title a-up d2" style={{ fontSize: fit(prize.name, 9, 80) }}>{prize.name}</div>
-            <div className="pill a-up d3">{prize.qty} pemenang</div>
-          </div>
+          <div className="showcase-title title a-up" style={{ fontSize: fit(prize.name, 8.5, 80) }}>{prize.name}</div>
+          <div className="podium-photo float-wrap a-photo"><PrizePhoto prize={prize} className="float" /></div>
+          <div className="showcase-pill pill a-up d3">{prize.qty} pemenang</div>
         </>
       );
     }

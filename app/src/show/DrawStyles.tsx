@@ -298,7 +298,7 @@ function Kado({ state, winner, p, audio, duration }: DrawProps) {
       cancelAnimationFrame(raf);
       dispose();
     };
-  }, [sceneAt, duration, pal.bg1, pal.primary, pal.primary2, light, hemat]);
+  }, [sceneAt, duration, pal.text, pal.primary, pal.primary2, light, hemat]);
   const rise = easeOut(seg(p, 0.76, 0.97));
   return (
     <>
