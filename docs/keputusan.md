@@ -203,4 +203,4 @@ Sebelum brainstorming, sempat dibuat prototipe satu file HTML. Kalau saya upload
 2. Engine cue list: Looping → Opener → Showcase → Ready → Undi → Reveal, hangus/undi ulang, simpan otomatis.
 3. Show: 3 layer (background WebGL, konten HTML, brand), 3 template generatif, 5 gaya undian, gerak di semua adegan, confetti + suara.
 4. Operator: mode dua layar (utama) dan satu layar (cadangan), keyboard & clicker, export pemenang CSV/Excel.
-5. Offline (PWA).
+5. Offline (PWA) ✓: service worker menyimpan semua file aplikasi setelah dibuka sekali; versi lama tidak dihapus selama masih ada jendela terbuka (show yang berjalan tidak terganggu pembaruan).
