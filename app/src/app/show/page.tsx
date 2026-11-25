@@ -5,6 +5,7 @@ import type { ShowState } from "@/engine/types";
 import { openChannel } from "@/lib/channel";
 import { keyToCommand, toggleFullscreen } from "@/lib/keys";
 import { loadShow } from "@/lib/storage";
+import { useOffline } from "@/lib/pwa";
 import { ShowView } from "@/show/ShowView";
 import { unlockAudio } from "@/show/sound";
 
@@ -15,6 +16,7 @@ import { unlockAudio } from "@/show/sound";
 export default function ShowPage() {
   const [state, setState] = useState<ShowState | null>(null);
   const [isFull, setIsFull] = useState(false);
+  useOffline(); // jendela LED juga memakai salinan offline
 
   useEffect(() => {
     // Tampilkan data tersimpan dulu, lalu ikuti jendela operator.
