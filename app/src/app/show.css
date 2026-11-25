@@ -174,3 +174,10 @@
 .led-show .stage { width: 100%; height: 100%; }
 .led-guide { position: absolute; border: 2px dashed #ff3b30; pointer-events: none; z-index: 5; }
 .led-guide span { position: absolute; left: 6px; top: 6px; background: #ff3b30; color: #fff; font: 600 11px Sora, sans-serif; padding: 2px 7px; border-radius: 6px; }
+
+/* Manual: penanda tegang & digit yang menyala */
+.reel-band.tense { animation: suspenseBand .6s ease-in-out infinite; }
+@keyframes suspenseBand { 50% { box-shadow: 0 0 .3em -.05em var(--p); } }
+.manual-engrave span { display: inline-block; }
+.lit-digit { animation: litIn .6s cubic-bezier(.2,1.4,.3,1) both; filter: drop-shadow(0 0 .12em color-mix(in srgb, var(--p) 60%, transparent)); }
+@keyframes litIn { from { transform: scale(1.25); filter: brightness(2) drop-shadow(0 0 .3em var(--p2)); } to { transform: none; } }

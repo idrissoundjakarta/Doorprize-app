@@ -82,8 +82,8 @@ export type Settings = {
   logo?: string;
   style: DrawStyle;
   tempo: Tempo;
-  /** Buka digit: "auto" (ikut tempo) atau "manual" (satu klik = satu digit). Kosong = auto. */
-  digitMode?: "auto" | "manual";
+  /** Undian: "auto" (ikut tempo) atau "manual" (maju per aba-aba MC, langkahnya sesuai gaya). Kosong = auto. */
+  drawMode?: "auto" | "manual";
   sound: boolean;
   theme: Theme;
 };
@@ -103,12 +103,14 @@ export type Scene =
       session: number;
       prize: number;
       drawId: string;
-      /** Buka digit Manual: digit dibuka satu per satu oleh operator (aba-aba MC). */
+      /** Mode Manual: undian maju selangkah demi selangkah mengikuti aba-aba MC (klik operator). */
       manual?: boolean;
-      /** Manual: jumlah digit yang sudah dibuka. */
+      /** Manual: jumlah langkah yang sudah dijalankan. */
       revealed?: number;
-      /** Manual: waktu digit terakhir dibuka (untuk anti dobel-klik & jeda sebelum reveal). */
+      /** Manual: waktu langkah terakhir (untuk anti dobel-klik & jeda sebelum reveal). */
       lockedAt?: number;
+      /** Manual: waktu tiap langkah (dipakai animasi supaya jendela LED & pratinjau sinkron). */
+      stepTimes?: number[];
     }
   | { kind: "reveal"; session: number; prize: number; drawId: string }
   | { kind: "end" };

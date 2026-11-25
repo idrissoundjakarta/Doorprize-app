@@ -1,19 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { DEBOUNCE_MS, DIGIT_FINAL_HOLD_MS, DIGIT_LOCK_MS, autoDuration, getDraw, getParticipant, reduce, resumeAfterReload } from "./engine";
+import { DEBOUNCE_MS, DIGIT_FINAL_HOLD_MS, DIGIT_LOCK_MS, FINAL_HOLD_MS, autoDuration, getDraw, getParticipant, manualStepLabel, manualSteps, reduce, resumeAfterReload } from "./engine";
 import { createShow, DEFAULT_SETTINGS } from "./sample";
 import type { Participant, ShowState } from "./types";
 
 let t = 5_000_000;
 const people = (nums: string[]): Participant[] => nums.map((n, i) => ({ id: `p${i}`, number: n, name: `Orang ${i}` }));
 const show = (nums: string[], mode: "auto" | "manual" = "manual", qty = 1): ShowState =>
-  createShow([{ id: "s", name: "Sesi", prizes: [{ id: "a", name: "A", qty }] }], people(nums), { ...DEFAULT_SETTINGS, style: "digit", digitMode: mode }, t);
+  createShow([{ id: "s", name: "Sesi", prizes: [{ id: "a", name: "A", qty }] }], people(nums), { ...DEFAULT_SETTINGS, style: "digit", drawMode: mode }, t);
 const next = (s: ShowState, gap = DEBOUNCE_MS + 1) => reduce(s, { type: "NEXT", now: (t += gap) }, () => 0);
 const auto = (s: ShowState) => reduce(s, { type: "AUTO_DONE", seq: s.sceneSeq, now: (t += 10) });
 /** looping → opener → showcase → ready → undi */
 const toDraw = (s: ShowState) => next(next(auto(next(s))));
 const sc = (s: ShowState) => s.scene as Extract<ShowState["scene"], { kind: "draw" }>;
 
-describe("Buka digit Manual", () => {
+describe("Mode Manual (aba-aba MC)", () => {
   it("satu klik = satu digit, lalu reveal setelah jeda", () => {
     let s = toDraw(show(["347"]));
     expect(sc(s).manual).toBe(true);
@@ -98,8 +98,37 @@ describe("Buka digit Manual", () => {
     expect(next(s).scene.kind).toBe("draw"); // NEXT diabaikan saat animasi Auto
   });
 
-  it("gaya lain tidak terpengaruh mode Manual", () => {
-    const s = toDraw(createShow([{ id: "s", name: "S", prizes: [{ id: "a", name: "A", qty: 1, style: "reel" }] }], people(["347"]), { ...DEFAULT_SETTINGS, style: "digit", digitMode: "manual" }, t));
-    expect(sc(s).manual).toBeUndefined();
+  it("gaya lain punya langkah sendiri: Slot reel = Perlambat → Stop!", () => {
+    let s = toDraw(createShow([{ id: "s", name: "S", prizes: [{ id: "a", name: "A", qty: 1, style: "reel" }] }], people(["34715"]), { ...DEFAULT_SETTINGS, style: "digit", drawMode: "manual" }, t));
+    expect(sc(s).manual).toBe(true);
+    expect(manualStepLabel("reel", 0)).toBe("Perlambat");
+    s = next(s, DIGIT_LOCK_MS + 1);
+    expect(autoDuration(s)).toBeNull(); // masih menunggu "Stop!"
+    s = next(s, DIGIT_LOCK_MS + 1);
+    expect(sc(s).revealed).toBe(2);
+    expect(sc(s).stepTimes).toHaveLength(2);
+    expect(autoDuration(s)).toBe(sc(s).lockedAt! - s.sceneAt + FINAL_HOLD_MS.reel);
+    expect(auto(s).scene.kind).toBe("reveal");
+  });
+
+  it("jumlah langkah per gaya", () => {
+    expect(manualSteps("digit", "007")).toBe(3);
+    expect(manualSteps("debu", "12345")).toBe(5);
+    expect(manualSteps("sorot", "12 34")).toBe(4);
+    expect(manualSteps("reel", "12345")).toBe(2);
+    expect(manualSteps("amplop", "1")).toBe(2);
+    expect(manualSteps("kado", "123")).toBe(2);
+    expect(manualStepLabel("kado", 1)).toBe("Buka kado!");
+    expect(manualStepLabel("amplop", 0)).toBe("Buka segel");
+  });
+
+  it("Amplop & Kado Manual: menunggu, 2 klik, lalu reveal", () => {
+    for (const style of ["amplop", "kado"] as const) {
+      let s = toDraw(createShow([{ id: "s", name: "S", prizes: [{ id: "a", name: "A", qty: 1, style }] }], people(["347"]), { ...DEFAULT_SETTINGS, drawMode: "manual" }, t));
+      s = reduce(s, { type: "AUTO_DONE", seq: s.sceneSeq, now: (t += 30_000) });
+      expect(s.scene.kind).toBe("draw");
+      s = next(next(s, DIGIT_LOCK_MS + 1), DIGIT_LOCK_MS + 1);
+      expect(auto(s).scene.kind).toBe("reveal");
+    }
   });
 });
