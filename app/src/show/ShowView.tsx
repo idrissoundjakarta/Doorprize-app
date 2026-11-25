@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
 import { SCENE_MOOD, TEMPO_MS, eligible, getDraw, getParticipant, getPrize, sahCount } from "@/engine/engine";
 import type { Prize, ShowState } from "@/engine/types";
 import { fit } from "@/lib/fit";
@@ -9,7 +9,7 @@ import { Background } from "./Background";
 import { Confetti } from "./Confetti";
 import { Ornaments3D } from "./Ornaments3D";
 import { Podium3D } from "./Podium3D";
-import { DrawStyleView, useProgress } from "./DrawStyles";
+import { DrawStyleView, MANUAL_PLAN, planProgress, useClock, useTickOn } from "./DrawStyles";
 import { sfxFanfare, sfxRise, sfxSwell } from "./sound";
 
 /**
@@ -233,11 +233,24 @@ function Ready({ state }: { state: ShowState }) {
 
 function Draw({ state, who, prizeName, style, audio }: { state: ShowState; who: NonNullable<ReturnType<typeof getParticipant>>; prizeName: string; style: ShowState["settings"]["style"]; audio: boolean }) {
   const duration = TEMPO_MS[state.settings.tempo];
-  const p = useProgress(state.sceneAt, duration);
+  const sc = state.scene;
+  const manual = sc.kind === "draw" && sc.manual ? { revealed: sc.revealed ?? 0, stepTimes: sc.stepTimes ?? [] } : undefined;
+  const t = useClock(state.sceneAt);
+  const plan = MANUAL_PLAN[style];
+  const sceneAt = state.sceneAt;
+  const stepKey = manual?.stepTimes.join(",");
+  const isManual = !!manual;
+  // Progres: Auto = waktu/tempo; Manual = mengikuti rencana langkah gaya ini (menunggu di antara aba-aba).
+  const progressAt = useCallback(
+    (now: number) => (isManual && plan ? planProgress(plan, now, sceneAt, stepKey ? stepKey.split(",").map(Number) : []) : Math.min(1, (now - sceneAt) / duration)),
+    [sceneAt, duration, plan, stepKey, isManual],
+  );
+  const p = progressAt(sceneAt + t * 1000);
+  useTickOn(manual?.revealed ?? 0, audio);
   return (
-    <div className={`stack draw draw-${style}`}>
+    <div className={`stack draw draw-${style} ${manual ? "manual" : ""}`}>
       {style !== "amplop" && <div className="kicker draw-kicker">{prizeName}</div>}
-      <DrawStyleView style={style} state={state} winner={who} p={p} audio={audio} duration={duration} />
+      <DrawStyleView style={style} state={state} winner={who} p={p} t={t} audio={audio} duration={duration} progressAt={progressAt} manual={manual} />
     </div>
   );
 }

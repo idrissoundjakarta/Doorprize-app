@@ -1,5 +1,5 @@
 import { secureRandomInt, uid, type RandomInt } from "./rng";
-import type { Action, Draw, Participant, Prize, Scene, SceneKind, ShowState } from "./types";
+import type { Action, Draw, DrawStyle, Participant, Prize, Scene, SceneKind, ShowState } from "./types";
 
 // ---------- Aturan per jenis adegan ----------
 
@@ -38,10 +38,43 @@ export const OPENER_MS = 3000;
 export const TEMPO_MS = { cepat: 4000, normal: 6000, dramatis: 8000 } as const;
 /** NEXT/BACK diabaikan selama ini setelah ganti adegan (anti dobel-tekan clicker). */
 export const DEBOUNCE_MS = 800;
-/** Buka digit Manual: jeda minimum antar-digit (klik ganda tidak melompati digit). */
+/** Manual: jeda minimum antar-langkah (klik ganda tidak melompati langkah). */
 export const DIGIT_LOCK_MS = 600;
 /** Buka digit Manual: digit terakhir ditahan sebentar sebelum layar pemenang. */
 export const DIGIT_FINAL_HOLD_MS = 1000;
+/** Manual: berapa lama animasi penutup tiap gaya setelah langkah terakhir, sebelum layar pemenang. */
+export const FINAL_HOLD_MS: Record<DrawStyle, number> = { digit: DIGIT_FINAL_HOLD_MS, debu: 1700, sorot: 1300, reel: 2700, amplop: 2100, kado: 2400 };
+
+/** Gaya undian sebuah hadiah (gaya khusus hadiah, atau gaya acara). */
+export function styleOf(state: ShowState, s: number, p: number): DrawStyle {
+  return state.sessions[s]?.prizes[p]?.style ?? state.settings.style;
+}
+
+/**
+ * Jumlah langkah Manual per gaya: per digit (Buka digit, Debu emas, Sorot cahaya),
+ * atau 2 langkah dramatis (Slot reel: perlambat → stop; Amplop: buka segel → keluarkan kartu; Kado: goyang → buka).
+ */
+export function manualSteps(style: DrawStyle, number: string): number {
+  return style === "digit" || style === "debu" || style === "sorot" ? lockablePositions(number) : 2;
+}
+
+/** Label tombol operator untuk langkah Manual berikutnya (k = 0 untuk langkah pertama). */
+export function manualStepLabel(style: DrawStyle, k: number): string {
+  switch (style) {
+    case "digit":
+      return `Stop digit ${k + 1}`;
+    case "debu":
+      return `Bentuk digit ${k + 1}`;
+    case "sorot":
+      return `Nyalakan digit ${k + 1}`;
+    case "reel":
+      return ["Perlambat", "Stop!"][k] ?? "Stop!";
+    case "amplop":
+      return ["Buka segel", "Keluarkan kartu"][k] ?? "Keluarkan kartu";
+    case "kado":
+      return ["Goyang makin kencang", "Buka kado!"][k] ?? "Buka kado!";
+  }
+}
 
 /** Posisi yang dibuka satu per satu (spasi ikut terbuka otomatis). Nol di depan tetap dihitung. */
 export function lockablePositions(number: string): number {
@@ -62,9 +95,10 @@ export function autoDuration(state: ShowState): number | null {
     case "draw": {
       const sc = state.scene;
       if (!sc.manual) return TEMPO_MS[state.settings.tempo];
-      // Manual: menunggu aba-aba, tanpa batas waktu. Setelah digit terakhir, jeda singkat lalu reveal.
-      if ((sc.revealed ?? 0) < lockablePositions(drawNumber(state, sc.drawId))) return null;
-      return (sc.lockedAt ?? state.sceneAt) - state.sceneAt + DIGIT_FINAL_HOLD_MS;
+      // Manual: menunggu aba-aba, tanpa batas waktu. Setelah langkah terakhir, animasi penutup lalu reveal.
+      const style = styleOf(state, sc.session, sc.prize);
+      if ((sc.revealed ?? 0) < manualSteps(style, drawNumber(state, sc.drawId))) return null;
+      return (sc.lockedAt ?? state.sceneAt) - state.sceneAt + FINAL_HOLD_MS[style];
     }
     default:
       return null;
@@ -150,10 +184,10 @@ function startDraw(state: ShowState, s: number, p: number, now: number, rand: Ra
     status: "pending",
     at: now,
   };
-  const manual = (prize.style ?? state.settings.style) === "digit" && state.settings.digitMode === "manual";
+  const manual = state.settings.drawMode === "manual";
   return go(
     { ...state, draws: [...state.draws, draw] },
-    manual ? { kind: "draw", session: s, prize: p, drawId: draw.id, manual: true, revealed: 0, lockedAt: now } : { kind: "draw", session: s, prize: p, drawId: draw.id },
+    manual ? { kind: "draw", session: s, prize: p, drawId: draw.id, manual: true, revealed: 0, lockedAt: now, stepTimes: [] } : { kind: "draw", session: s, prize: p, drawId: draw.id },
     now,
   );
 }
@@ -201,7 +235,7 @@ export function reduce(state: ShowState, action: Action, rand: RandomInt = secur
           : go(state, { kind: "showcase", session: sc.session, prize: p }, action.now);
       }
       if (sc.kind === "draw") {
-        if (sc.manual && (sc.revealed ?? 0) < lockablePositions(drawNumber(state, sc.drawId))) return state; // masih menunggu aba-aba
+        if (sc.manual && (sc.revealed ?? 0) < manualSteps(styleOf(state, sc.session, sc.prize), drawNumber(state, sc.drawId))) return state; // masih menunggu aba-aba
         return go(state, { kind: "reveal", session: sc.session, prize: sc.prize, drawId: sc.drawId }, action.now);
       }
       return state;
@@ -214,13 +248,13 @@ export function reduce(state: ShowState, action: Action, rand: RandomInt = secur
     }
 
     case "NEXT": {
-      // Buka digit Manual: satu NEXT = satu digit, dengan jeda minimum supaya klik ganda tidak melompati digit.
+      // Manual: satu NEXT = satu langkah, dengan jeda minimum supaya klik ganda tidak melompati langkah.
       if (sc.kind === "draw" && sc.manual) {
-        const total = lockablePositions(drawNumber(state, sc.drawId));
+        const total = manualSteps(styleOf(state, sc.session, sc.prize), drawNumber(state, sc.drawId));
         const n = sc.revealed ?? 0;
         if (n >= total) return state;
         if (action.now - (sc.lockedAt ?? state.sceneAt) < DIGIT_LOCK_MS) return state;
-        return { ...state, scene: { ...sc, revealed: n + 1, lockedAt: action.now } };
+        return { ...state, scene: { ...sc, revealed: n + 1, lockedAt: action.now, stepTimes: [...(sc.stepTimes ?? []), action.now] } };
       }
       if (SCENE_MODE[sc.kind] !== "hold") return state;
       if (action.now - state.sceneAt < DEBOUNCE_MS) return state;
@@ -267,7 +301,7 @@ export function reduce(state: ShowState, action: Action, rand: RandomInt = secur
 export function resumeAfterReload(state: ShowState, now: number): ShowState {
   const sc = state.scene;
   // Manual: tetap menunggu aba-aba MC (digit yang sudah dibuka tetap terbuka).
-  if (sc.kind === "draw" && sc.manual && (sc.revealed ?? 0) < lockablePositions(drawNumber(state, sc.drawId))) return state;
+  if (sc.kind === "draw" && sc.manual && (sc.revealed ?? 0) < manualSteps(styleOf(state, sc.session, sc.prize), drawNumber(state, sc.drawId))) return state;
   if (sc.kind === "draw") return go(state, { kind: "reveal", session: sc.session, prize: sc.prize, drawId: sc.drawId }, now);
   return state;
 }
@@ -286,9 +320,10 @@ export function describeNext(state: ShowState): string {
       return eligible(state).length === 0 ? "Peserta habis, tidak bisa undi" : "NEXT → Undi";
     case "draw": {
       if (!sc.manual) return "Otomatis → Reveal pemenang";
-      const total = lockablePositions(drawNumber(state, sc.drawId));
+      const style = styleOf(state, sc.session, sc.prize);
+      const total = manualSteps(style, drawNumber(state, sc.drawId));
       const n = sc.revealed ?? 0;
-      return n >= total ? "Semua digit terbuka → Reveal pemenang" : `NEXT → Stop digit ${n + 1} dari ${total} (tunggu aba-aba MC)`;
+      return n >= total ? "Langkah terakhir selesai → Reveal pemenang" : `NEXT → ${manualStepLabel(style, n)} (langkah ${n + 1} dari ${total}, tunggu aba-aba MC)`;
     }
     case "reveal": {
       const prize = getPrize(state, sc.session, sc.prize);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SCENE_LABEL, SCENE_MODE, describeNext, eligible, getDraw, getParticipant, getPrize, lockablePositions } from "@/engine/engine";
+import { SCENE_LABEL, SCENE_MODE, describeNext, eligible, getDraw, getParticipant, getPrize, manualStepLabel, manualSteps, styleOf } from "@/engine/engine";
 import type { ShowState } from "@/engine/types";
 import { download, winnersCsv } from "@/lib/export";
 import { keyToCommand, toggleFullscreen } from "@/lib/keys";
@@ -31,10 +31,11 @@ function nextButton(state: ShowState): { label: string; sub: string; enabled: bo
       return eligible(state).length === 0 ? { label: "Peserta habis", sub: "Tidak ada peserta yang bisa diundi", enabled: false } : { label: "Undi sekarang", sub: `${eligible(state).length} peserta`, enabled: true };
     case "draw": {
       if (sc.manual) {
-        const total = lockablePositions(getParticipant(state, getDraw(state, sc.drawId)?.participantId ?? "")?.number ?? "");
+        const style = styleOf(state, sc.session, sc.prize);
+        const total = manualSteps(style, getParticipant(state, getDraw(state, sc.drawId)?.participantId ?? "")?.number ?? "");
         const n = sc.revealed ?? 0;
-        if (n >= total) return { label: "Semua digit terbuka", sub: "Sebentar lagi layar pemenang", enabled: false };
-        return { label: `Stop digit ${n + 1}`, sub: `${n} dari ${total} terbuka · tekan saat MC bilang "stop"`, enabled: true };
+        if (n >= total) return { label: "Membuka…", sub: "Sebentar lagi layar pemenang", enabled: false };
+        return { label: manualStepLabel(style, n), sub: `Langkah ${n + 1} dari ${total} · tekan saat MC memberi aba-aba`, enabled: true };
       }
       return { label: "Mengundi…", sub: "Otomatis ke layar pemenang", enabled: false };
     }
