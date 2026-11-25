@@ -16,6 +16,7 @@ import { PreflightList } from "./Preflight";
 import { SoloShow } from "./SoloShow";
 import { Welcome } from "./Welcome";
 import { Dialog, Logo, useToast } from "./ui";
+import { useOffline, type OfflineStatus } from "@/lib/pwa";
 
 /** Teks tombol NEXT sesuai adegan, supaya operator tahu persis apa yang terjadi kalau ditekan. */
 function nextButton(state: ShowState): { label: string; sub: string; enabled: boolean } {
@@ -53,6 +54,7 @@ export function Operator() {
   const [panel, setPanel] = useState(false);
   const [dialog, setDialog] = useState<null | "hangus" | "restart" | "endGladi">(null);
   const [toast, showToast] = useToast();
+  const offline = useOffline();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -222,6 +224,7 @@ export function Operator() {
         {state.sample && <span className="chip c-warn">! Data contoh</span>}
         {state.rehearsal && <span className="chip c-info"><span className="dot" style={{ background: "var(--info-t)" }} />Mode gladi</span>}
         <div className="grow" />
+        <OfflineChip {...offline} />
         <span className="hide-m">{showConnected ? <span className="chip c-go"><span className="dot" style={{ background: "var(--go-t)" }} />LED terhubung</span> : <span className="chip c-neu">○ LED belum dibuka</span>}</span>
         {saveFailed ? <span className="chip c-dng">✕ Gagal menyimpan</span> : <span className="small muted hide-m" title="Semua perubahan tersimpan otomatis di perangkat ini">✓ Tersimpan</span>}
         {tab === "show" && (
@@ -335,3 +338,12 @@ export function Operator() {
 }
 
 type ScreenDetailed = Screen & { availLeft: number; availTop: number };
+
+/** Status offline: operator tahu aplikasi sudah tersimpan dan aman dipakai tanpa internet di venue. */
+function OfflineChip({ status, update }: { status: OfflineStatus; update: boolean }) {
+  if (status === "dev") return null;
+  if (update) return <span className="chip c-info" title="Muat ulang aplikasi saat tidak sedang show">i Versi baru siap · muat ulang nanti</span>;
+  if (status === "ready") return <span className="chip c-go" title="Semua file aplikasi tersimpan di perangkat ini. Bisa dibuka & dijalankan tanpa internet.">✓ Siap offline</span>;
+  if (status === "installing") return <span className="chip c-neu">◌ Menyiapkan offline…</span>;
+  return <span className="chip c-warn" title="Browser ini tidak mendukung mode offline. Pakai Chrome/Edge terbaru dan pastikan internet tersedia di venue.">! Belum bisa offline</span>;
+}

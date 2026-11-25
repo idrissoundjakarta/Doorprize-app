@@ -3,7 +3,7 @@
 Aplikasi undian doorprize untuk event corporate (gathering, gala dinner, family day). Undian tampil sebagai *show* di LED/proyektor. Operator menyiapkan acara, peserta, sesi dan hadiah, lalu menjalankan undian cukup dengan tombol **NEXT** (keyboard atau clicker presentasi). Tempo acara tetap dipegang MC.
 
 - **Coba prototipe:** https://idrissoundjakarta.github.io/Doorprize-app/ (Chrome/Edge di laptop, atau Chrome/Safari di HP)
-- **Status:** MVP dalam pengerjaan. Engine, flow show, visual & animasi, setup, operator, dan Mode HP sudah jalan. Belum: offline penuh (PWA).
+- **Status:** MVP dalam pengerjaan. Engine, flow show, visual & animasi, setup, operator, dan Mode HP sudah jalan. Bisa dipakai tanpa internet setelah dibuka sekali (tanda **✓ Siap offline** di jendela operator).
 
 ## Cara mencoba (5 menit)
 
@@ -14,6 +14,8 @@ Aplikasi undian doorprize untuk event corporate (gathering, gala dinner, family 
 5. Mau latihan dulu? Tekan **Mulai gladi**. Hasil gladi tidak dihitung dan otomatis dihapus saat menekan **Selesai gladi**.
 
 **Dari HP:** buka link yang sama, isi Setup, lalu tekan **Tampilkan show di HP ini**. Putar HP mendatar. Tap layar = lanjut, tahan = menu operator (hangus, layar hitam, keluar). Sambungkan HP ke LED lewat kabel USB-C→HDMI atau screen mirroring. Di iPhone, pakai *Bagikan → Tambahkan ke Layar Utama* supaya tampil layar penuh.
+
+**Tanpa internet di venue:** buka aplikasi sekali saat masih ada internet (misalnya di kantor) sampai muncul **✓ Siap offline**. Setelah itu aplikasi bisa dibuka dan dijalankan tanpa internet di laptop/HP yang sama. Bisa juga dipasang sebagai aplikasi (menu browser → *Install* / *Tambahkan ke Layar Utama*).
 
 Semua data tersimpan di browser masing-masing. Tidak ada server dan tidak ada akun.
 
