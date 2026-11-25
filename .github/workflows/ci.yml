@@ -1,0 +1,37 @@
+# Pemeriksaan otomatis untuk setiap Pull Request: tipe, lint, uji engine, dan build.
+# Hasilnya tampil sebagai ✓/✗ di halaman PR.
+name: Pemeriksaan PR
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  periksa:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci
+      - name: Cek tipe (TypeScript)
+        run: npx tsc --noEmit
+      - name: Lint
+        run: npx eslint src
+      - name: Uji engine
+        run: npx vitest run
+      - name: Build
+        run: npm run build
