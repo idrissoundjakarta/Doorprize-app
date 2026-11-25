@@ -70,6 +70,8 @@ export type Settings = {
   logo?: string;
   style: DrawStyle;
   tempo: Tempo;
+  /** Buka digit: "auto" (ikut tempo) atau "manual" (satu klik = satu digit). Kosong = auto. */
+  digitMode?: "auto" | "manual";
   sound: boolean;
   theme: Theme;
 };
@@ -84,7 +86,18 @@ export type Scene =
   | { kind: "opener"; session: number }
   | { kind: "showcase"; session: number; prize: number }
   | { kind: "ready"; session: number; prize: number }
-  | { kind: "draw"; session: number; prize: number; drawId: string }
+  | {
+      kind: "draw";
+      session: number;
+      prize: number;
+      drawId: string;
+      /** Buka digit Manual: digit dibuka satu per satu oleh operator (aba-aba MC). */
+      manual?: boolean;
+      /** Manual: jumlah digit yang sudah dibuka. */
+      revealed?: number;
+      /** Manual: waktu digit terakhir dibuka (untuk anti dobel-klik & jeda sebelum reveal). */
+      lockedAt?: number;
+    }
   | { kind: "reveal"; session: number; prize: number; drawId: string }
   | { kind: "end" };
 

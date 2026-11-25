@@ -111,7 +111,7 @@ export function Setup({ state, setState, onDone, toast }: Props) {
         {step === "tampilan" && <StepTampilan st={st} setTheme={setTheme} />}
         {step === "peserta" && <StepPeserta participants={participants} setParticipants={setParticipants} toast={toast} />}
         {step === "sesi" && <StepSesi sessions={sessions} setSessions={setSessions} />}
-        {step === "gaya" && <StepGaya st={st} setSettings={setSettings} onPreview={(s) => { setPreviewStyle(s); setPreview("draw"); }} />}
+        {step === "gaya" && <StepGaya st={st} usesDigit={st.style === "digit" || sessions.some((x) => x.prizes.some((p) => p.style === "digit"))} setSettings={setSettings} onPreview={(s) => { setPreviewStyle(s); setPreview("draw"); }} />}
         <div className="row">
           {STEPS.findIndex((s) => s.id === step) > 0 && <button className="btn b-sec" onClick={() => setStep(STEPS[STEPS.findIndex((s) => s.id === step) - 1].id)}>◀ Sebelumnya</button>}
           {STEPS.findIndex((s) => s.id === step) < STEPS.length - 1 && <button className="btn b-pri right" onClick={() => setStep(STEPS[STEPS.findIndex((s) => s.id === step) + 1].id)}>Lanjut <span className="go-ico" style={{ width: 26, height: 26 }}>→</span></button>}
@@ -454,7 +454,7 @@ function StepSesi({ sessions, setSessions }: { sessions: Session[]; setSessions:
 }
 
 // ================= Langkah 5: Gaya undian =================
-function StepGaya({ st, setSettings, onPreview }: { st: Settings; setSettings: (p: Partial<Settings>) => void; onPreview: (s: DrawStyle) => void }) {
+function StepGaya({ st, usesDigit, setSettings, onPreview }: { st: Settings; usesDigit: boolean; setSettings: (p: Partial<Settings>) => void; onPreview: (s: DrawStyle) => void }) {
   return (
     <>
       <Head n={5} title="Gaya undian" desc="Gaya bawaan untuk semua hadiah. Hadiah tertentu bisa memakai gaya lain di langkah Sesi & hadiah." />
@@ -466,8 +466,22 @@ function StepGaya({ st, setSettings, onPreview }: { st: Settings; setSettings: (
           </button>
         ))}
       </div>
+      {usesDigit && (
+        <div className="card col">
+          <div className="lbl">Buka digit: siapa yang menentukan tempo?</div>
+          <div className="seg g" style={{ alignSelf: "start" }}>
+            <button className={(st.digitMode ?? "auto") === "auto" ? "on" : ""} onClick={() => setSettings({ digitMode: "auto" })}>Auto · ikut tempo</button>
+            <button className={st.digitMode === "manual" ? "on" : ""} onClick={() => setSettings({ digitMode: "manual" })}>Manual · ikut aba-aba MC</button>
+          </div>
+          <div className="small muted" style={{ lineHeight: 1.6 }}>
+            {st.digitMode === "manual"
+              ? "Digit berputar dan menunggu. Setiap MC bilang \"stop\", operator tekan NEXT/clicker sekali untuk membuka satu digit (contoh 3•• → 34• → 347). Pemenang sudah diundi sebelum digit pertama, jadi waktu klik tidak mengubah hasil."
+              : "Digit terbuka sendiri sesuai tempo di bawah."}
+          </div>
+        </div>
+      )}
       <div className="card col">
-        <div className="lbl">Tempo undian</div>
+        <div className="lbl">Tempo undian{st.style === "digit" && st.digitMode === "manual" ? " (gaya selain Buka digit)" : ""}</div>
         <div className="seg g" style={{ alignSelf: "start" }}>
           {(["cepat", "normal", "dramatis"] as const).map((t) => <button key={t} className={st.tempo === t ? "on" : ""} onClick={() => setSettings({ tempo: t })}>{{ cepat: "Cepat · 4 dtk", normal: "Normal · 6 dtk", dramatis: "Dramatis · 8 dtk" }[t]}</button>)}
         </div>
