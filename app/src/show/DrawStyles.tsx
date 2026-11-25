@@ -492,7 +492,8 @@ function ManualSorot({ winner, t, state, manual }: DrawProps & { manual: ManualI
             const at = lit ? (manual.stepTimes[k] - state.sceneAt) / 1000 : 0;
             return (
               <span key={i} className={lit ? "gold-text lit-digit" : ""} style={lit ? { animationDelay: `${-(t - at)}s` } : undefined}>
-                {c}
+                {/* Belum menyala: karakter acak berganti, supaya angka asli tidak terbaca sebelum waktunya. */}
+                {lit ? c : /\d/.test(c) ? String(hash(Math.floor(t * 9), i) % 10) : String.fromCharCode(65 + (hash(Math.floor(t * 9), i) % 26))}
               </span>
             );
           })}
