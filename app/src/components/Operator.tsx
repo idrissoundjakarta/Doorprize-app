@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { SCENE_LABEL, SCENE_MODE, describeNext, eligible, getDraw, getParticipant, getPrize } from "@/engine/engine";
 import type { ShowState } from "@/engine/types";
-import { download, winnersCsv } from "@/lib/export";
+import { downloadBlob } from "@/lib/export";
+import { winnersXlsx, xlsxFilename } from "@/lib/exportXlsx";
 import { keyToCommand, toggleFullscreen } from "@/lib/keys";
 import { useShowController } from "@/lib/useShowController";
 import { ShowView } from "@/show/ShowView";
@@ -194,8 +195,9 @@ export function Operator() {
     window.open(url, "doorprize-show", features);
   };
 
-  const exportCsv = () => {
-    download(`pemenang-${new Date().toISOString().slice(0, 10)}.csv`, winnersCsv(state));
+  const exportCsv = async () => {
+    // File Excel asli (.xlsx): sheet Pemenang (termasuk hangus) + Ringkasan per hadiah.
+    downloadBlob(xlsxFilename(state), await winnersXlsx(state));
     showToast("Daftar pemenang diexport");
   };
   const allPrizes = state.sessions.flatMap((s) => s.prizes);
