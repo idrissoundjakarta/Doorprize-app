@@ -162,3 +162,15 @@
 
 /* Ornamen 3D di layar pemenang (di belakang teks, di depan background) */
 .ornament-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+
+/* ================= Kanvas LED (frame di luar area show 16:9) ================= */
+.led-outer { position: relative; width: 100%; height: 100%; container-type: size; display: grid; place-items: center; background: #000; overflow: hidden; }
+.led-canvas { position: relative; width: min(100cqw, calc(100cqh * var(--arn))); aspect-ratio: var(--ar); overflow: hidden; }
+.led-canvas > .bg-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.led-frame-img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.led-frame-default { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 70% 80% at 50% 50%, transparent 55%, color-mix(in srgb, var(--fb2) 55%, transparent)); }
+.led-show { position: absolute; }
+.led-show.on-default::after { content: ""; position: absolute; inset: 0; pointer-events: none; box-shadow: 0 0 0 1px color-mix(in srgb, var(--fp, #fff) 22%, transparent), 0 0 4vmin -1vmin color-mix(in srgb, var(--fp, #fff) 25%, transparent); }
+.led-show .stage { width: 100%; height: 100%; }
+.led-guide { position: absolute; border: 2px dashed #ff3b30; pointer-events: none; z-index: 5; }
+.led-guide span { position: absolute; left: 6px; top: 6px; background: #ff3b30; color: #fff; font: 600 11px Sora, sans-serif; padding: 2px 7px; border-radius: 6px; }

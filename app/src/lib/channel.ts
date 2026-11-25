@@ -10,7 +10,7 @@ export type Command = "next" | "back" | "hangus" | "blank";
 export type Message =
   | { t: "state"; state: ShowState; hangusArmed: boolean }
   | { t: "hello" } // jendela show baru dibuka / di-refresh, minta state
-  | { t: "alive" } // detak jantung dari jendela show
+  | { t: "alive"; w?: number; h?: number } // detak jantung dari jendela show (+ ukuran layarnya dalam piksel)
   | { t: "cmd"; cmd: Command };
 
 export const CHANNEL = "doorprize-show";

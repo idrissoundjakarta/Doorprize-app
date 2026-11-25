@@ -16,12 +16,9 @@ import { sfxFanfare, sfxRise, sfxSwell } from "./sound";
  * Tampilan show (3 layer): background WebGL, konten, brand.
  * Dipakai di jendela show (audio aktif), pratinjau operator, dan mode satu layar.
  */
-export function ShowView({ state, audio = false }: { state: ShowState; audio?: boolean }) {
+/** Intensitas background per adegan (0 = tenang, 1 = intens). Dipakai juga oleh frame LED. */
+export function useIntensity(state: ShowState): number {
   const sc = state.scene;
-  const th = state.settings.theme;
-  const pal = th.palette;
-  const grand = isGrand(state);
-
   // Reveal: intens di awal, lalu turun supaya MC bisa bicara.
   const [calmReveal, setCalmReveal] = useState(false);
   useEffect(() => {
@@ -31,7 +28,19 @@ export function ShowView({ state, audio = false }: { state: ShowState; audio?: b
     const id = setTimeout(() => setCalmReveal(true), Math.max(0, 2500 - (Date.now() - state.sceneAt)));
     return () => clearTimeout(id);
   }, [sc.kind, state.sceneSeq, state.sceneAt]);
-  const intensity = sc.kind === "draw" ? 1 : sc.kind === "reveal" ? (calmReveal ? 0.5 : 1) : sc.kind === "opener" ? 0.45 : SCENE_MOOD[sc.kind] === "intens" ? 1 : 0;
+  return sc.kind === "draw" ? 1 : sc.kind === "reveal" ? (calmReveal ? 0.5 : 1) : sc.kind === "opener" ? 0.45 : SCENE_MOOD[sc.kind] === "intens" ? 1 : 0;
+}
+
+/**
+ * bare = tanpa background sendiri (dipakai di dalam frame LED bawaan,
+ * yang menggambar satu background menerus di seluruh layar LED).
+ */
+export function ShowView({ state, audio = false, bare = false }: { state: ShowState; audio?: boolean; bare?: boolean }) {
+  const sc = state.scene;
+  const th = state.settings.theme;
+  const pal = th.palette;
+  const grand = isGrand(state);
+  const intensity = useIntensity(state);
 
   // Suara saat adegan baru dimulai (tidak diputar ulang setelah refresh).
   useEffect(() => {
@@ -57,7 +66,7 @@ export function ShowView({ state, audio = false }: { state: ShowState; audio?: b
 
   return (
     <div className={`stage ${isLightPalette(pal) ? "light" : "dark"}`} style={vars}>
-      <Background theme={th} intensity={intensity} />
+      {!bare && <Background theme={th} intensity={intensity} />}
       {sc.kind === "reveal" && !state.blank && <Ornaments3D key={`o${state.sceneSeq}`} state={state} grand={grand} />}
       {sc.kind === "reveal" && !state.blank && <Confetti key={state.sceneSeq} colors={confettiColors} seed={state.sceneSeq} big={grand} />}
 

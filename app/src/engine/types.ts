@@ -63,7 +63,19 @@ export type Theme = {
   quality: "tinggi" | "hemat";
 };
 
+/** Layar LED venue: resolusi piksel + frame opsional di luar area show 16:9. */
+export type LedSettings = {
+  width: number;
+  height: number;
+  /** Frame custom (gambar disimpan terpisah di penyimpanan aset, berdasarkan id). Kosong = frame bawaan. */
+  frameId?: string;
+  frameW?: number;
+  frameH?: number;
+};
+
 export type Settings = {
+  /** Kosong = 1920×1080 (16:9). */
+  led?: LedSettings;
   eventTitle: string;
   companyName: string;
   /** Logo klien (data URL, sudah dikecilkan). */

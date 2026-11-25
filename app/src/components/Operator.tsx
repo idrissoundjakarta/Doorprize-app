@@ -6,7 +6,8 @@ import type { ShowState } from "@/engine/types";
 import { download, winnersCsv } from "@/lib/export";
 import { keyToCommand, toggleFullscreen } from "@/lib/keys";
 import { useShowController } from "@/lib/useShowController";
-import { ShowView } from "@/show/ShowView";
+import { ledOf, sameAspect } from "@/lib/led";
+import { LedStage } from "@/show/LedStage";
 import { unlockAudio } from "@/show/sound";
 import { Setup } from "./Setup";
 import { preflight, preflightOk } from "@/engine/preflight";
@@ -46,7 +47,7 @@ function nextButton(state: ShowState): { label: string; sub: string; enabled: bo
 }
 
 export function Operator() {
-  const { state, setState, dispatch, command, hangusNow, hangusArmed, showConnected, saveFailed, welcome, start, blockedAt } = useShowController();
+  const { state, setState, dispatch, command, hangusNow, hangusArmed, showConnected, saveFailed, welcome, start, blockedAt, showSize } = useShowController();
   const [tab, setTab] = useState<"show" | "setup">("show");
   const [solo, setSolo] = useState(false);
   const [panel, setPanel] = useState(false);
@@ -81,6 +82,8 @@ export function Operator() {
   const sc = state.scene;
   const nb = nextButton(state);
   const manualDraw = sc.kind === "draw" && !!sc.manual;
+  const led = ledOf(state.settings);
+  const ratioMismatch = showConnected && showSize && !sameAspect(showSize.w, showSize.h, led.width, led.height);
   const revealDraw = sc.kind === "reveal" ? getDraw(state, sc.drawId) : undefined;
   const revealWho = revealDraw && getParticipant(state, revealDraw.participantId);
   const revealPrize = sc.kind === "reveal" ? getPrize(state, sc.session, sc.prize) : undefined;
@@ -242,8 +245,8 @@ export function Operator() {
             </button>
             <div className="card col" style={{ padding: 18 }}>
               {status}
-              <div className="preview" style={{ position: "relative" }}>
-                <ShowView state={state} />
+              <div className="preview" style={{ position: "relative", aspectRatio: `${led.width} / ${led.height}` }}>
+                <LedStage state={state} />
                 {notStarted && !preflightOk(checks) && (
                   <div className="preview-empty">
                     <b>Data acara belum lengkap</b>
@@ -254,6 +257,16 @@ export function Operator() {
               </div>
             </div>
             {hangusArmed && <span className="chip c-dng" style={{ alignSelf: "start" }}>✕ Tekan H sekali lagi (3 detik) untuk menghanguskan</span>}
+            {ratioMismatch && showSize && (
+              <div className="card row wrap" style={{ padding: 16, background: "var(--warn-bg)", color: "var(--warn-t)" }}>
+                <b style={{ fontSize: 18 }}>!</b>
+                <div className="grow" style={{ minWidth: 220 }}>
+                  <b>Rasio layar LED berbeda dari setup</b>
+                  <div className="small" style={{ opacity: 0.9 }}>Jendela LED sekarang {showSize.w}×{showSize.h} px, setup {led.width}×{led.height} px. Show tetap utuh, tapi ada bingkai hitam. Pastikan jendela LED fullscreen di layar LED, atau sesuaikan resolusi di Setup → Layar LED.</div>
+                </div>
+                <button className="btn b-sm b-sec" onClick={() => setTab("setup")}>Buka Setup</button>
+              </div>
+            )}
             {state.rehearsal && (
               <div className="card row wrap" style={{ padding: 16, background: "var(--info-bg)", color: "var(--info-t)" }}>
                 <span className="dot" style={{ background: "var(--info-t)", width: 12, height: 12 }} />
