@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { DrawStyle, Participant, ShowState } from "@/engine/types";
 import { fit } from "@/lib/fit";
 import { hexToRgb, isLightPalette, mix, rgbToHex } from "@/lib/color";
-import { sfxSwell, sfxTick } from "./sound";
+import { sfxHit, sfxSwell, sfxTick } from "./sound";
 
 /**
  * 5 gaya undian. Pemenang SUDAH dipilih engine sebelum animasi dimulai;
@@ -71,6 +71,15 @@ export function useTickOn(n: number, audio: boolean, strongAt?: number) {
     if (audio && n > prev.current) sfxTick(strongAt !== undefined && n >= strongAt);
     prev.current = n;
   }, [n, audio, strongAt]);
+}
+
+/** "Hit" meriah setiap kali `n` bertambah (digit/langkah terbuka). Nada naik per langkah; `total` = langkah terakhir (paling besar). */
+export function useHitOn(n: number, audio: boolean, total: number) {
+  const prev = useRef(n);
+  useEffect(() => {
+    if (audio && n > prev.current) sfxHit(n, n >= total);
+    prev.current = n;
+  }, [n, audio, total]);
 }
 
 export function DrawStyleView({ style, ...props }: DrawProps & { style: DrawStyle }) {
@@ -150,7 +159,7 @@ function AutoDigits({ winner, p, audio, duration }: DrawProps) {
   const n = chars.length;
   const lockAt = (i: number) => (i === n - 1 ? 0.9 : 0.22 + (0.4 * i) / Math.max(1, n - 1));
   const locked = chars.filter((_, i) => p >= lockAt(i)).length;
-  useTickOn(locked, audio, n);
+  useHitOn(locked, audio, n);
   // Putaran melambat menjelang akhir.
   const spin = (duration / 1000) * (14 * p - 5 * p * p);
   return (
@@ -193,7 +202,8 @@ function Reel({ state, winner, p, audio }: DrawProps) {
   const e = 1 - Math.pow(1 - p, 4);
   const pos = e * (ROWS - 1);
   const speed = 4 * Math.pow(1 - p, 3) * (ROWS - 1);
-  useTickOn(p > 0.55 ? Math.floor(pos) : 0, audio, ROWS - 1);
+  useTickOn(p > 0.55 && pos < ROWS - 1.5 ? Math.floor(pos) : 0, audio);
+  useHitOn(pos >= ROWS - 1.02 ? 1 : 0, audio, 1);
   return (
     <div className="reel-wrap" style={{ fontSize: fit(winner.number, 17, 60) }}>
       <div className="reel-band" />
@@ -219,7 +229,7 @@ function Amplop({ state, winner, p, t, audio, manual }: DrawProps) {
   const card = easeInOut(seg(p, 0.5, 0.82));
   const zoom = easeInOut(seg(p, 0.84, 1));
   const opened = p >= 0.33 ? 1 : 0;
-  useTickOn(opened, audio);
+  useHitOn(opened, audio && !manual, 1);
   useEffect(() => {
     if (audio) sfxSwell();
   }, [audio]);
@@ -246,7 +256,8 @@ function Amplop({ state, winner, p, t, audio, manual }: DrawProps) {
 }
 
 // ---------- 4. Debu emas ----------
-function Debu({ state, winner, audio, manual }: DrawProps) {
+function Debu({ state, winner, p, audio, manual }: DrawProps) {
+  useHitOn(p >= 0.75 ? 1 : 0, audio && !manual, 1);
   const ref = useRef<HTMLCanvasElement>(null);
   const man = useRef(manual);
   useEffect(() => {
@@ -348,7 +359,7 @@ function Debu({ state, winner, audio, manual }: DrawProps) {
 function Sorot({ winner, p, audio }: DrawProps) {
   const sweep = easeInOut(seg(p, 0.06, 0.8));
   const full = easeOut(seg(p, 0.78, 0.96));
-  useTickOn(p >= 0.8 ? 1 : 0, audio);
+  useHitOn(p >= 0.8 ? 1 : 0, audio, 1);
   useEffect(() => {
     if (audio) sfxSwell();
   }, [audio]);
@@ -367,7 +378,7 @@ function Sorot({ winner, p, audio }: DrawProps) {
 }
 
 // ---------- 6. Kado kejutan (3D) ----------
-function Kado({ state, winner, p, audio, duration, progressAt }: DrawProps) {
+function Kado({ state, winner, p, audio, duration, progressAt, manual }: DrawProps) {
   const pAt = useRef(progressAt);
   useEffect(() => {
     pAt.current = progressAt;
@@ -380,7 +391,7 @@ function Kado({ state, winner, p, audio, duration, progressAt }: DrawProps) {
   useEffect(() => {
     if (audio) sfxSwell();
   }, [audio]);
-  useTickOn(p >= 0.7 ? 1 : 0, audio, 1);
+  useHitOn(p >= 0.7 ? 1 : 0, audio && !manual, 1);
   useEffect(() => {
     let alive = true, raf = 0, dispose = () => {};
     const cv = ref.current!;
