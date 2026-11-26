@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
-import { SCENE_MOOD, TEMPO_MS, eligible, getDraw, getParticipant, getPrize, sahCount } from "@/engine/engine";
+import { SCENE_MOOD, TEMPO_MS, eligible, manualSteps, getDraw, getParticipant, getPrize, sahCount } from "@/engine/engine";
 import type { Prize, ShowState } from "@/engine/types";
 import { fit } from "@/lib/fit";
 import { isLightPalette } from "@/lib/color";
@@ -9,7 +9,7 @@ import { Background } from "./Background";
 import { Confetti } from "./Confetti";
 import { Ornaments3D } from "./Ornaments3D";
 import { Podium3D } from "./Podium3D";
-import { DrawStyleView, MANUAL_PLAN, planProgress, useClock, useTickOn } from "./DrawStyles";
+import { DrawStyleView, MANUAL_PLAN, planProgress, useClock, useHitOn } from "./DrawStyles";
 import { sfxFanfare, sfxRise, sfxSwell } from "./sound";
 
 /**
@@ -246,7 +246,7 @@ function Draw({ state, who, prizeName, style, audio }: { state: ShowState; who: 
     [sceneAt, duration, plan, stepKey, isManual],
   );
   const p = progressAt(sceneAt + t * 1000);
-  useTickOn(manual?.revealed ?? 0, audio);
+  useHitOn(manual?.revealed ?? 0, audio, manualSteps(style, who.number));
   return (
     <div className={`stack draw draw-${style} ${manual ? "manual" : ""}`}>
       {style !== "amplop" && <div className="kicker draw-kicker">{prizeName}</div>}
