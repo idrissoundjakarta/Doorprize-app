@@ -70,6 +70,8 @@ export type Settings = {
   logo?: string;
   style: DrawStyle;
   tempo: Tempo;
+  /** Undian: "auto" (ikut tempo) atau "manual" (maju per aba-aba MC, langkahnya sesuai gaya). Kosong = auto. */
+  drawMode?: "auto" | "manual";
   sound: boolean;
   theme: Theme;
 };
@@ -84,7 +86,20 @@ export type Scene =
   | { kind: "opener"; session: number }
   | { kind: "showcase"; session: number; prize: number }
   | { kind: "ready"; session: number; prize: number }
-  | { kind: "draw"; session: number; prize: number; drawId: string }
+  | {
+      kind: "draw";
+      session: number;
+      prize: number;
+      drawId: string;
+      /** Mode Manual: undian maju selangkah demi selangkah mengikuti aba-aba MC (klik operator). */
+      manual?: boolean;
+      /** Manual: jumlah langkah yang sudah dijalankan. */
+      revealed?: number;
+      /** Manual: waktu langkah terakhir (untuk anti dobel-klik & jeda sebelum reveal). */
+      lockedAt?: number;
+      /** Manual: waktu tiap langkah (dipakai animasi supaya jendela LED & pratinjau sinkron). */
+      stepTimes?: number[];
+    }
   | { kind: "reveal"; session: number; prize: number; drawId: string }
   | { kind: "end" };
 

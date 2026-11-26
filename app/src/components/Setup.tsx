@@ -467,7 +467,25 @@ function StepGaya({ st, setSettings, onPreview }: { st: Settings; setSettings: (
         ))}
       </div>
       <div className="card col">
-        <div className="lbl">Tempo undian</div>
+        <div className="lbl">Siapa yang menentukan tempo undian?</div>
+        <div className="seg g" style={{ alignSelf: "start" }}>
+          <button className={(st.drawMode ?? "auto") === "auto" ? "on" : ""} onClick={() => setSettings({ drawMode: "auto" })}>Auto · ikut tempo</button>
+          <button className={st.drawMode === "manual" ? "on" : ""} onClick={() => setSettings({ drawMode: "manual" })}>Manual · ikut aba-aba MC</button>
+        </div>
+        <div className="small muted" style={{ lineHeight: 1.6 }}>
+          {st.drawMode === "manual" ? (
+            <>
+              Animasi menahan ketegangan dan menunggu. Setiap MC memberi aba-aba, operator tekan NEXT/clicker sekali (atau tap di HP). Langkahnya sesuai gaya:
+              <br />Buka digit · Debu emas · Sorot cahaya: <b>satu digit per aba-aba</b> · Slot reel: <b>Perlambat → Stop!</b> · Amplop emas: <b>Buka segel → Keluarkan kartu</b> · Kado kejutan: <b>Goyang makin kencang → Buka kado!</b>
+              <br />Pemenang sudah diundi sebelum animasi mulai, jadi waktu klik tidak mengubah hasil.
+            </>
+          ) : (
+            "Animasi berjalan sendiri sesuai tempo di bawah."
+          )}
+        </div>
+      </div>
+      <div className="card col">
+        <div className="lbl">Tempo undian{st.drawMode === "manual" ? " (hanya untuk mode Auto)" : ""}</div>
         <div className="seg g" style={{ alignSelf: "start" }}>
           {(["cepat", "normal", "dramatis"] as const).map((t) => <button key={t} className={st.tempo === t ? "on" : ""} onClick={() => setSettings({ tempo: t })}>{{ cepat: "Cepat · 4 dtk", normal: "Normal · 6 dtk", dramatis: "Dramatis · 8 dtk" }[t]}</button>)}
         </div>

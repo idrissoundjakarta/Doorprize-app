@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SCENE_LABEL, SCENE_MODE, describeNext, eligible, getDraw, getParticipant, getPrize } from "@/engine/engine";
+import { SCENE_LABEL, SCENE_MODE, describeNext, eligible, getDraw, getParticipant, getPrize, manualStepLabel, manualSteps, styleOf } from "@/engine/engine";
 import type { ShowState } from "@/engine/types";
 import { download, winnersCsv } from "@/lib/export";
 import { keyToCommand, toggleFullscreen } from "@/lib/keys";
@@ -29,8 +29,16 @@ function nextButton(state: ShowState): { label: string; sub: string; enabled: bo
       return { label: "Siap undi", sub: "Tampilkan jumlah peserta", enabled: true };
     case "ready":
       return eligible(state).length === 0 ? { label: "Peserta habis", sub: "Tidak ada peserta yang bisa diundi", enabled: false } : { label: "Undi sekarang", sub: `${eligible(state).length} peserta`, enabled: true };
-    case "draw":
+    case "draw": {
+      if (sc.manual) {
+        const style = styleOf(state, sc.session, sc.prize);
+        const total = manualSteps(style, getParticipant(state, getDraw(state, sc.drawId)?.participantId ?? "")?.number ?? "");
+        const n = sc.revealed ?? 0;
+        if (n >= total) return { label: "Membuka…", sub: "Sebentar lagi layar pemenang", enabled: false };
+        return { label: manualStepLabel(style, n), sub: `Langkah ${n + 1} dari ${total} · tekan saat MC memberi aba-aba`, enabled: true };
+      }
       return { label: "Mengundi…", sub: "Otomatis ke layar pemenang", enabled: false };
+    }
     case "reveal":
       return { label: "Sah · Lanjut", sub: describeNext(state).replace(/^NEXT \(sah\) → /, "Berikutnya: ").replace(/ · H×2 → Hangus$/, ""), enabled: true };
     case "end":
@@ -73,6 +81,7 @@ export function Operator() {
 
   const sc = state.scene;
   const nb = nextButton(state);
+  const manualDraw = sc.kind === "draw" && !!sc.manual;
   const revealDraw = sc.kind === "reveal" ? getDraw(state, sc.drawId) : undefined;
   const revealWho = revealDraw && getParticipant(state, revealDraw.participantId);
   const revealPrize = sc.kind === "reveal" ? getPrize(state, sc.session, sc.prize) : undefined;
@@ -91,7 +100,7 @@ export function Operator() {
           {nb.label}
           <small>{nb.sub}</small>
         </span>
-        <span className="go-ico">{SCENE_MODE[sc.kind] === "auto" ? "…" : "→"}</span>
+        <span className="go-ico">{SCENE_MODE[sc.kind] === "auto" && !manualDraw ? "…" : "→"}</span>
       </button>
       <button className="btn b-dng" disabled={sc.kind !== "reveal"} onClick={() => setDialog("hangus")}>Hangus <span className="kbd">H×2</span></button>
     </div>
@@ -107,7 +116,7 @@ export function Operator() {
         </div>
       </div>
       <span className="chip c-ink"><span className="dot" style={{ background: "#ff6b5b" }} />LIVE</span>
-      <span className="chip c-neu">{SCENE_MODE[sc.kind] === "auto" ? "AUTO · berjalan sendiri" : "HOLD · menunggu MC"}</span>
+      <span className="chip c-neu">{manualDraw ? "MANUAL · menunggu aba-aba MC" : SCENE_MODE[sc.kind] === "auto" ? "AUTO · berjalan sendiri" : "HOLD · menunggu MC"}</span>
       {state.blank && <span className="chip c-warn">! Layar hitam aktif</span>}
     </div>
   );
@@ -282,6 +291,11 @@ export function Operator() {
                   <table className="t">
                     <tbody>
                       {[...state.draws].reverse().map((d) => {
+                        // Selama undian berjalan, identitas pemenang belum ditampilkan (termasuk ke operator).
+                        if (d.status === "pending" && sc.kind === "draw")
+                          return (
+                            <tr key={d.id}><td colSpan={3}><span className="chip c-ink">● Sedang diundi…</span></td></tr>
+                          );
                         const who = getParticipant(state, d.participantId);
                         const prize = allPrizes.find((p) => p.id === d.prizeId);
                         return (
