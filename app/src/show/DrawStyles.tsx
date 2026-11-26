@@ -427,35 +427,41 @@ function ManualReel({ state, winner, t, audio, manual }: DrawProps & { manual: M
   const ps = state.participants;
   const seq = state.sceneSeq;
   const N = ROWS;
+  // Baris pengisi (bukan pemenang). Nomor pemenang baru ditaruh di satu baris saat "Stop!" ditekan.
   const list = useMemo(() => {
-    const out: string[] = [];
-    for (let i = 0; i < N - 1; i++) out.push(ps[hash(seq, i) % ps.length]?.number ?? "");
-    out.push(winner.number); // pemenang di posisi N-1 setiap putaran
-    return out;
+    const pool = ps.filter((x) => x.number !== winner.number);
+    const src = pool.length ? pool : ps;
+    return Array.from({ length: N }, (_, i) => src[hash(seq, i) % src.length]?.number ?? "");
   }, [ps, seq, winner.number, N]);
   const [t1, t2] = manual.stepTimes.map((x) => (x - state.sceneAt) / 1000);
-  // Posisi = jarak tempuh: kencang → melambat → mendarat tepat di pemenang.
+  const d = DECEL_MS / 1000;
+  const p1 = t1 === undefined ? 0 : FAST * t1;
+  const pSlow = (u: number) => (u < d ? p1 + FAST * u - ((FAST - SLOW) * u * u) / (2 * d) : p1 + ((FAST + SLOW) / 2) * d + SLOW * (u - d));
+  const vSlow = (u: number) => (u < d ? FAST - ((FAST - SLOW) * u) / d : SLOW);
+  // Saat "Stop!": lanjut dari kecepatan saat itu lalu melambat mulus sampai berhenti di baris pemenang
+  // (beberapa baris di depan), tanpa ngebut lagi.
+  const T = LAND_MS / 1000;
+  const p2 = t1 !== undefined && t2 !== undefined ? pSlow(t2 - t1) : 0;
+  const v2 = t1 !== undefined && t2 !== undefined ? vSlow(t2 - t1) : 0;
+  const target = t2 !== undefined ? Math.ceil(p2 + (v2 * T) / 1.8) : Number.NaN;
   const posAt = (tt: number): number => {
     if (t1 === undefined || tt < t1) return FAST * tt;
-    const d = DECEL_MS / 1000;
-    const p1 = FAST * t1;
-    const pSlow = (u: number) => (u < d ? p1 + FAST * u - ((FAST - SLOW) * u * u) / (2 * d) : p1 + ((FAST + SLOW) / 2) * d + SLOW * (u - d));
     if (t2 === undefined || tt < t2) return pSlow(tt - t1);
-    const p2 = pSlow(t2 - t1);
-    const target = Math.ceil((p2 + 3 - (N - 1)) / N) * N + (N - 1);
-    const e = 1 - Math.pow(1 - clamp((tt - t2) / (LAND_MS / 1000)), 3);
-    return p2 + (target - p2) * e;
+    const D = target - p2;
+    const a = (v2 * T) / D; // kemiringan awal = kecepatan saat Stop ditekan
+    const s = clamp((tt - t2) / T);
+    return p2 + D * (a * s + (3 - 2 * a) * s * s + (a - 2) * s * s * s);
   };
   const pos = posAt(t);
   const speed = Math.abs(posAt(t + 0.05) - pos) / 0.05;
-  const landed = t2 !== undefined && t - t2 >= LAND_MS / 1000;
+  const landed = t2 !== undefined && t - t2 >= T;
   useTickOn(t1 !== undefined ? Math.floor(pos) : 0, audio);
   const base = Math.floor(pos);
   const rows = [];
   for (let i = base - 2; i <= base + 3; i++) {
-    const v = list[((i % N) + N) % N];
+    const v = i === target ? winner.number : list[((i % N) + N) % N];
     rows.push(
-      <div key={i} className={`reel-item ${landed && i === Math.round(pos) ? "gold-text win" : ""}`} style={{ position: "absolute", left: 0, right: 0, top: `${(i - pos + 1) * 1.25}em` }}>
+      <div key={i} className={`reel-item ${landed && i === target ? "gold-text win" : ""}`} style={{ position: "absolute", left: 0, right: 0, top: `${(i - pos + 1) * 1.25}em` }}>
         {v}
       </div>,
     );
